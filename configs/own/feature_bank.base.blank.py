@@ -21,15 +21,15 @@ python tools/test.py <path/to/this/config> <path/to/Pytorch/Model> --out <path/t
 _base_ = ['backbone.base.py']
 
 # Paths Config
-# <SOURCE> # You need to specify data root: e.g. Source_Root='/media/veracrypt4/Q1/Snippets/Sample'
-# <OUTPUT> # You need to specify output path: e.g. Output_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'
+Source_Root='<SOURCE>' # You need to specify data root: e.g. '/media/veracrypt4/Q1/Snippets/Sample'
+Output_Path='<OUTPUT>' # You need to specify output path: e.g. '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'
 Frames_Offset = 'Frames'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'
 Detections_File = 'Detections.pkl'
 
 # Other Config
-# <DATASET> # You need to specify DataSet=[Train|Validate|Test]
+DataSet='<DATASET>' # You need to specify [Train|Validate|Test]
 HalfPrecision = True # [True|False]
 ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 

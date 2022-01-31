@@ -9,7 +9,7 @@
 #     [Cores] - Number of GPUs (parallel) to use
 #
 #  USAGE:
-#     srun --time=08:00:00 --gres=gpu:1 finetune_lfb.sh C 1 # If on Charles nodes
+#     srun --time=08:00:00 --gres=gpu:1 bash/finetune_lfb.sh C 1 # If on Charles nodes
 #
 #  Data Structures
 #    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
@@ -52,12 +52,12 @@ echo "   .. Copying Models .. "
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/lfb/
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
-sed -i "s@# <SOURCE>@Source_Root=${DATA_HOME}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
-sed -i "s@# <OUTPUT>@Output_Path=${DATA_HOME}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
+sed -i "s@<SOURCE>@${DATA_HOME}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
+sed -i "s@<OUTPUT>@${DATA_HOME}/feature_bank@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
-sed -i "s@# <DATASET>@DataSet=Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
+sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
-sed -i "s@# <DATASET>@DataSet=Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
+sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
 echo "    Models Done!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
 echo ""
@@ -78,6 +78,7 @@ python tools/test.py \
    ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
    ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
    --out /dev/null
+
 # ===========
 # Train Model
 # ===========
