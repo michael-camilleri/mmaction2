@@ -48,9 +48,10 @@ echo "    Data Done!"
 echo " ------------------------------"
 echo "  -> Synchronising Models"
 mkdir -p ${SCRATCH_HOME}/models/lfb/
+echo "   .. Copying Models .. "
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/lfb/
 echo "   .. Synchronising and Formatting Configs .. "
-rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
+rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
 sed -i "s/# <SOURCE>/Source_Root=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
 sed -i "s/# <OUTPUT>/Output_Path=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
@@ -64,8 +65,19 @@ echo ""
 # ======================
 # Generate Feature Banks
 # ======================
-
-
+echo " ===================================="
+echo " Generating Feature-Bank Vectors "
+#echo "  -> Training Set"
+#python tools/test.py \
+#   ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
+#   ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+#   --out /dev/null
+#echo " ------------------------------"
+echo "  -> Validation Set"
+python tools/test.py \
+   ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
+   ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+   --out /dev/null
 # ===========
 # Train Model
 # ===========

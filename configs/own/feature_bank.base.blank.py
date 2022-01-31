@@ -7,14 +7,16 @@ It has the minimal amount of changes to work with my Data Structure i.e.:
   3. Image Normalisation (my parameters)
   4. Re-Organisation of the Configurations to be more understandable to me.
 
-**N.B.**: To Use it, you must search and replace for <CHOOSE_DATASET> to set the DataSet name.
+**N.B.**: To Use it, you must search and replace some variables as per below
 
 It should be used in conjunction with a `feature_bank`-type model (e.g. backbone.base.pth) 
 
 Usage (from within MMAction2 directory):
 python tools/test.py <path/to/this/config> <path/to/Pytorch/Model> --out <path/to/output/csv>
 """
+
 ################## CONFIG VALUES ##################
+
 # Base Config
 _base_ = ['backbone.base.py']
 
