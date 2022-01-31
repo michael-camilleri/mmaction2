@@ -19,8 +19,8 @@ python tools/test.py <path/to/this/config> <path/to/Pytorch/Model> --out <path/t
 _base_ = ['backbone.base.py']
 
 # Paths Config
-Source_Root = '/media/veracrypt4/Q1/Snippets/Sample'
-Output_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'
+# <SOURCE> # You need to specify data root: e.g. Source_Root='/media/veracrypt4/Q1/Snippets/Sample'
+# <OUTPUT> # You need to specify output path: e.g. Output_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'
 Frames_Offset = 'Frames'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'

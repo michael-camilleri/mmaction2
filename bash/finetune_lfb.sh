@@ -37,12 +37,13 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
+DATA_HOME=${SCRATCH_HOME}/data/behaviour/
 echo "  -> Synchronising Data"
-mkdir -p ${SCRATCH_HOME}/data/behaviour
-echo "    .. Train .. "
-rsync --archive --update --compress ${HOME}/data/behaviour/Train ${SCRATCH_HOME}/data/behaviour/
+mkdir -p ${DATA_HOME}
+#echo "    .. Train .. "
+#rsync --archive --update --compress ${HOME}/data/behaviour/Train ${DATA_HOME}/
 echo "    .. Validate .. "
-rsync --archive --update --compress ${HOME}/data/behaviour/Validate ${SCRATCH_HOME}/data/behaviour/
+rsync --archive --update --compress ${HOME}/data/behaviour/Validate ${DATA_HOME}/
 echo "    Data Done!"
 echo " ------------------------------"
 echo "  -> Synchronising Models"
@@ -50,6 +51,8 @@ mkdir -p ${SCRATCH_HOME}/models/lfb/
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/lfb/
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
+sed -i "s/# <SOURCE>/Source_Root=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
+sed -i "s/# <OUTPUT>/Output_Path=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
 sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
