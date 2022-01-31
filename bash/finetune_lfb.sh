@@ -52,12 +52,12 @@ echo "   .. Copying Models .. "
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/lfb/
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
-sed -i "s/# <SOURCE>/Source_Root=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
-sed -i "s/# <OUTPUT>/Output_Path=${DATA_HOME}/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
+sed -i "s@# <SOURCE>@Source_Root=${DATA_HOME}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
+sed -i "s@# <OUTPUT>@Output_Path=${DATA_HOME}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
-sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
+sed -i "s@# <DATASET>@DataSet=Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
 cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
-sed -i "s/# <DATASET>/DataSet=Validate/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
+sed -i "s@# <DATASET>@DataSet=Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
 echo "    Models Done!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
 echo ""
