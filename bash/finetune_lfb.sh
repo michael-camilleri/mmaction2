@@ -9,7 +9,7 @@
 #     [Cores] - Number of GPUs (parallel) to use
 #
 #  USAGE:
-#     bash train_lfb.sh
+#     srun --time=08:00:00 --gres=gpu:1 finetune_lfb.sh C 1 # If on Charles nodes
 #
 #  Data Structures
 #     Data is expected to be under ${HOME}/data/LFB/[DATASET] where [DATASET] is Train/Validate
@@ -19,7 +19,7 @@
 # ===================
 # Environment setup
 # ===================
-echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST}"
+echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST} (${1}) with ${2} GPU(s)."
 set -e # Make script bail out after first error
 source activate py3mma   # Activate Conda Environment
 echo "Libraries from: ${LD_LIBRARY_PATH}"
@@ -41,9 +41,12 @@ rsync --archive --update --compress "${HOME}/data/LFB/" ${SCRATCH_HOME}/data/beh
 echo "    Data Done!"
 echo "  -> Synchronising Model"
 mkdir -p ${SCRATCH_HOME}/models/behaviour/
-rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/behaviour/
+echo "    .. Train .. "
+rsync --archive --update --compress ${HOME}/models/LFB/Base/Train ${SCRATCH_HOME}/models/behaviour/
+echo "    .. Validate .. "
+rsync --archive --update --compress ${HOME}/models/LFB/Base/Validate ${SCRATCH_HOME}/models/behaviour/
+echo "  -> Synchronising and Formatting Configs"
 rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/behaviour/
-echo "  -> Formatting FB Config"
 cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
 sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
 cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.valid.py
@@ -62,7 +65,7 @@ mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Mod
 #cd ${HOME}/code/LZDetect
 #echo "Training Model..."
 #python -m torch.distributed.launch \
-#   --nproc_per_node=${3} tools/train_net.py \
+#   --nproc_per_node=${2} tools/train_net.py \
 #   --config-file "${SCRATCH_HOME}/models/fcos/config.yaml" \
 #   --skip-test \
 #   PATHS_CATALOG "${HOME}/code/LZDetect/fcos_core/config/paths_catalog.py" \
