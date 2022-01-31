@@ -12,8 +12,8 @@
 #     srun --time=08:00:00 --gres=gpu:1 finetune_lfb.sh C 1 # If on Charles nodes
 #
 #  Data Structures
-#     Data is expected to be under ${HOME}/data/LFB/[DATASET] where [DATASET] is Train/Validate
-#     Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
+#    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
+#    Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
 
 
 # ===================
@@ -30,29 +30,33 @@ export NCCL_DEBUG=INFO
 # Make your own folder on the node's scratch disk
 SCRATCH_HOME=/disk/scratch/${USER}
 mkdir -p ${SCRATCH_HOME}
+echo ""
 
 # ================================
 # Download Data and Models if necessary
 # ================================
+echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 echo "  -> Synchronising Data"
 mkdir -p ${SCRATCH_HOME}/data/behaviour
-rsync --archive --update --compress "${HOME}/data/LFB/" ${SCRATCH_HOME}/data/behaviour/
-echo "    Data Done!"
-echo "  -> Synchronising Model"
-mkdir -p ${SCRATCH_HOME}/models/behaviour/
 echo "    .. Train .. "
-rsync --archive --update --compress ${HOME}/models/LFB/Base/Train ${SCRATCH_HOME}/models/behaviour/
+rsync --archive --update --compress ${HOME}/data/behaviour/Train ${SCRATCH_HOME}/data/behaviour/
 echo "    .. Validate .. "
-rsync --archive --update --compress ${HOME}/models/LFB/Base/Validate ${SCRATCH_HOME}/models/behaviour/
-echo "  -> Synchronising and Formatting Configs"
-rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/behaviour/
-cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
-sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
-cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.valid.py
-sed -i "s/# <DATASET>/DataSet=Validate/" ${SCRATCH_HOME}/models/behaviour/feature_bank.base.valid.py
+rsync --archive --update --compress ${HOME}/data/behaviour/Validate ${SCRATCH_HOME}/data/behaviour/
+echo "    Data Done!"
+echo " ------------------------------"
+echo "  -> Synchronising Models"
+mkdir -p ${SCRATCH_HOME}/models/lfb/
+rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/lfb/
+echo "   .. Synchronising and Formatting Configs .. "
+rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/lfb/
+cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
+sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
+cp ${SCRATCH_HOME}/models/lfb/feature_bank.base.blank.py ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
+sed -i "s/# <DATASET>/DataSet=Validate/" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
 echo "    Models Done!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
+echo ""
 
 # ======================
 # Generate Feature Banks
