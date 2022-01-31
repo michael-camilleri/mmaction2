@@ -37,7 +37,7 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
-DATA_HOME=${SCRATCH_HOME}/data/behaviour/
+DATA_HOME=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
 mkdir -p ${DATA_HOME}
 #echo "    .. Train .. "
@@ -75,7 +75,7 @@ echo " Generating Feature-Bank Vectors "
 #echo " ------------------------------"
 echo "  -> Validation Set"
 python tools/test.py \
-   ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
+   ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py \
    ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
    --out ${DATA_HOME}/feature_bank/validate.csv
 
