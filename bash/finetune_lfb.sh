@@ -6,14 +6,14 @@
 #
 #  Script takes two parameters
 #     A/C - Choice between running on Apollo or Charles Nodes
-#     [Cores] - Number of GPU Threads to use
+#     [Cores] - Number of GPUs (parallel) to use
 #
 #  USAGE:
 #     bash train_lfb.sh
 #
 #  Data Structures
 #     Data is expected to be under ${HOME}/data/LFB/[DATASET] where [DATASET] is Train/Validate
-#     Model PTHs/Configs are under ${HOME}/models/LFB/Base/[models/configs] respectively
+#     Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
 
 
 # ===================
@@ -42,9 +42,14 @@ echo "    Data Done!"
 echo "  -> Synchronising Model"
 mkdir -p ${SCRATCH_HOME}/models/behaviour/
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_HOME}/models/behaviour/
+rsync --archive --update --compress ${HOME}/conde/MMAction/configs/own/ ${SCRATCH_HOME}/models/behaviour/
+echo "  -> Formatting FB Config"
+cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
+sed -i "s/# <DATASET>/DataSet=Train/" ${SCRATCH_HOME}/models/behaviour/feature_bank.base.train.py
+cp ${SCRATCH_HOME}/models/behaviour/feature_bank.base.blank.py ${SCRATCH_HOME}/models/behaviour/feature_bank.base.valid.py
+sed -i "s/# <DATASET>/DataSet=Validate/" ${SCRATCH_HOME}/models/behaviour/feature_bank.base.valid.py
 echo "    Models Done!"
-mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "On ${1}: Synchronised Data (from ${2}) and
-Model"
+mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
 
 # ======================
 # Generate Feature Banks
@@ -54,26 +59,26 @@ Model"
 # ===========
 # Train Model
 # ===========
-cd ${HOME}/code/LZDetect
-echo "Training Model..."
-python -m torch.distributed.launch \
-   --nproc_per_node=${3} tools/train_net.py \
-   --config-file "${SCRATCH_HOME}/models/fcos/config.yaml" \
-   --skip-test \
-   PATHS_CATALOG "${HOME}/code/LZDetect/fcos_core/config/paths_catalog.py" \
-   MODEL.WEIGHT "${SCRATCH_HOME}/models/fcos/model.pth" \
-   DATASETS.BASE "${SCRATCH_HOME}/data" \
-   OUTPUT_DIR "${SCRATCH_HOME}/models/fcos/output" \
-   SOLVER.IMS_PER_BATCH 16 \
-   SOLVER.MAX_ITER 30000 \
-   SOLVER.CHECKPOINT_PERIOD 1000
-mail -s "Train_FCOS:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training (on ${1}) Completed"
+#cd ${HOME}/code/LZDetect
+#echo "Training Model..."
+#python -m torch.distributed.launch \
+#   --nproc_per_node=${3} tools/train_net.py \
+#   --config-file "${SCRATCH_HOME}/models/fcos/config.yaml" \
+#   --skip-test \
+#   PATHS_CATALOG "${HOME}/code/LZDetect/fcos_core/config/paths_catalog.py" \
+#   MODEL.WEIGHT "${SCRATCH_HOME}/models/fcos/model.pth" \
+#   DATASETS.BASE "${SCRATCH_HOME}/data" \
+#   OUTPUT_DIR "${SCRATCH_HOME}/models/fcos/output" \
+#   SOLVER.IMS_PER_BATCH 16 \
+#   SOLVER.MAX_ITER 30000 \
+#   SOLVER.CHECKPOINT_PERIOD 1000
+#mail -s "Train_FCOS:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training (on ${1}) Completed"
 
 # ===========
 # Copy Data
 # ===========
-echo "Copying Results"
-mkdir -p "${HOME}/models/FCOS/Trained/${1}_${2}/"
-rsync --archive --update --compress "${SCRATCH_HOME}/models/fcos/output/" "${HOME}/models/FCOS/Trained/${1}_${2}/"
-mail -s "Train_FCOS:Progress" ${USER}@sms.ed.ac.uk <<< "Outputs Copied to ${1}_${2}"
-conda deactivate
+#echo "Copying Results"
+#mkdir -p "${HOME}/models/FCOS/Trained/${1}_${2}/"
+#rsync --archive --update --compress "${SCRATCH_HOME}/models/fcos/output/" "${HOME}/models/FCOS/Trained/${1}_${2}/"
+#mail -s "Train_FCOS:Progress" ${USER}@sms.ed.ac.uk <<< "Outputs Copied to ${1}_${2}"
+#conda deactivate
