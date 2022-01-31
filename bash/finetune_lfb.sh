@@ -13,7 +13,7 @@
 #
 #  Data Structures
 #     Data is expected to be under ${HOME}/data/LFB/[DATASET] where [DATASET] is Train/Validate
-#     Model Paths/Configs are under ${HOME}/models/LFB/Base (in one directory)
+#     Model PTHs/Configs are under ${HOME}/models/LFB/Base/[models/configs] respectively
 
 
 # ===================
