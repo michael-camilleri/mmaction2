@@ -71,13 +71,13 @@ echo " Generating Feature-Bank Vectors "
 #python tools/test.py \
 #   ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
 #   ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-#   --out /dev/null
+#   --out ${DATA_HOME}/feature_bank/train.csv
 #echo " ------------------------------"
 echo "  -> Validation Set"
 python tools/test.py \
    ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
    ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-   --out /dev/null
+   --out ${DATA_HOME}/feature_bank/validate.csv
 
 # ===========
 # Train Model
