@@ -113,7 +113,7 @@ echo ""
 echo " ===================================="
 echo " Training Model on ${2} GPU(s)"
 python -m torch.distributed.launch --nproc_per_node=${2} tools/train.py \
-    ${MODEL_HOME}/train.base.py --cfg-options total_epochs=5 \
+    ${MODEL_HOME}/train.base.py --launcher pytorch --cfg-options total_epochs=5 \
     --validate --seed 0 --deterministic
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training (on ${1}) Completed"
 
