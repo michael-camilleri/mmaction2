@@ -20,7 +20,7 @@
 
 # Do some Calculations
 let "BATCH_SIZE=$1 * $2"
-LEARN_RATE = $(echo "${BATCH_SIZE} * $4" | bc)
+LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
 
 # ===================
 # Environment setup
@@ -128,7 +128,7 @@ echo ""
 # Copy Data
 # ===========
 echo " ===================================="
-OUT_NAME = ${3}_${BATCH_SIZE}_${LEARN_RATE}
+OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
 echo " Copying Results to ${OUT_NAME}"
 mkdir -p "${HOME}/models/LFB/Trained/${OUT_NAME}"
 rsync --archive --update --compress "${MODEL_HOME}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
