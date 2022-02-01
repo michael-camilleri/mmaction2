@@ -112,7 +112,7 @@ val_pipeline = [ # The testing is w/o. any cropping / flipping
 
 # Data Definition
 data = dict(
-    videos_per_gpu=4,
+    videos_per_gpu=2,
     workers_per_gpu=2,
     val_dataloader=dict(videos_per_gpu=1),
     test_dataloader=dict(videos_per_gpu=1),
@@ -159,7 +159,7 @@ lr_config = dict(
     warmup_by_epoch=True,
     warmup_iters=5,
     warmup_ratio=0.1)
-total_epochs = 1
+total_epochs = 5
 checkpoint_config = dict(interval=1)
 
 
