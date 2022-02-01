@@ -12,7 +12,7 @@
 #
 #  USAGE:
 #     (Should be run from MMAction2 Directory)
-#     srun --time=08:00:00 --gres=gpu:4 bash/finetune_lfb.sh C 4 4 20 # If on Charles nodes
+#     srun --time=08:00:00 --gres=gpu:4 bash/finetune_lfb.sh 4 4 1 0.001 > ~/logs/lfb.test.out
 #
 #  Data Structures
 #    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
@@ -20,7 +20,7 @@
 
 # Do some Calculations
 let "BATCH_SIZE=$1 * $2"
-let "LEARN_RATE=$BATCH_SIZE * $4"
+LEARN_RATE = $(echo "${BATCH_SIZE} * $4" | bc)
 
 # ===================
 # Environment setup
