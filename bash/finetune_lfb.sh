@@ -65,8 +65,8 @@ sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.vali
 #  Update Training FB Config
 sed -i "s@<SOURCE>@${DATA_HOME}@" ${MODEL_HOME}/train.base.py
 sed -i "s@<FEATUREBANK>@${DATA_HOME}/feature_bank@" ${MODEL_HOME}/train.base.py
-sed -i "s@<MODELINIT>@${MODEL_HOME}/inference.base.pth@" ${MODEL_HOME}/feature_bank.base.py
-sed -i "s@<MODELOUT>@${MODEL_HOME}/out@" ${MODEL_HOME}/feature_bank.base.py
+sed -i "s@<MODELINIT>@${MODEL_HOME}/inference.base.pth@" ${MODEL_HOME}/train.base.py
+sed -i "s@<MODELOUT>@${MODEL_HOME}/out@" ${MODEL_HOME}/train.base.py
 mkdir -p ${MODEL_HOME}/out
 echo "    Models Done!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
@@ -112,7 +112,7 @@ echo ""
 # ===========
 echo " ===================================="
 echo " Training Model on ${2} GPU(s)"
-python -m torch.distributed.launch --nproc_per_node=${2} tools/train_net.py \
+python -m torch.distributed.launch --nproc_per_node=${2} tools/train.py \
     ${MODEL_HOME}/train.base.py --cfg-options total_epochs=5 \
     --validate --seed 0 --deterministic
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training (on ${1}) Completed"
