@@ -4,23 +4,28 @@
 #  Scope:
 #     Fine-Tunes the LFB model (no explicit LFB/Backbone training beyond what goes on in backprop)
 #
-#  Script takes two parameters
-#     A/C - Choice between running on Apollo or Charles Nodes
-#     [Cores] - Number of GPUs (parallel) to use
+#  Script takes the following parameters
+#     [Cores] - Number of GPUs to use to Train Model
+#     [Images] - Number of Images per-GPU
+#     [Epochs] - Maximum Number of Epochs to train for
+#     [Rate] - Base Learning Rate (per sample, to be multiplied by batch size)
 #
 #  USAGE:
 #     (Should be run from MMAction2 Directory)
-#     srun --time=08:00:00 --gres=gpu:4 bash/finetune_lfb.sh C 4 # If on Charles nodes
+#     srun --time=08:00:00 --gres=gpu:4 bash/finetune_lfb.sh C 4 4 20 # If on Charles nodes
 #
 #  Data Structures
 #    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
 #    Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
 
+# Do some Calculations
+let "BATCH_SIZE=$1 * $2"
+let "LEARN_RATE=$BATCH_SIZE * $4"
 
 # ===================
 # Environment setup
 # ===================
-echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST} (${1}) with ${2} GPU(s)."
+echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST} with ${1} GPU(s)"
 set -e # Make script bail out after first error
 source activate py3mma   # Activate Conda Environment
 echo "Libraries from: ${LD_LIBRARY_PATH}"
@@ -111,17 +116,22 @@ echo ""
 # Train Model
 # ===========
 echo " ===================================="
-echo " Training Model on ${2} GPU(s)"
-python -m torch.distributed.launch --nproc_per_node=${2} tools/train.py \
-    ${MODEL_HOME}/train.base.py --launcher pytorch --cfg-options total_epochs=5 \
-    --validate --seed 0 --deterministic
-mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training (on ${1}) Completed"
+echo " Training Model with ${1} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${3} epochs"
+python -m torch.distributed.launch --nproc_per_node=${1} tools/train.py \
+    ${MODEL_HOME}/train.base.py --launcher pytorch \
+    --validate --seed 0 --deterministic \
+    --cfg-options data.videos_per_gpu=${2} total_epochs=${3} optimizer.lr=${LEARN_RATE}
+mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
+echo ""
 
 # ===========
 # Copy Data
 # ===========
-#echo "Copying Results"
-#mkdir -p "${HOME}/models/FCOS/Trained/${1}_${2}/"
-#rsync --archive --update --compress "${SCRATCH_HOME}/models/fcos/output/" "${HOME}/models/FCOS/Trained/${1}_${2}/"
-#mail -s "Train_FCOS:Progress" ${USER}@sms.ed.ac.uk <<< "Outputs Copied to ${1}_${2}"
-#conda deactivate
+echo " ===================================="
+OUT_NAME = ${3}_${BATCH_SIZE}_${LEARN_RATE}
+echo " Copying Results to ${OUT_NAME}"
+mkdir -p "${HOME}/models/LFB/Trained/${OUT_NAME}"
+rsync --archive --update --compress "${MODEL_HOME}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+rm -rf ${MODEL_HOME}/out
+mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Output Models copied."
+conda deactivate

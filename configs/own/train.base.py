@@ -149,7 +149,7 @@ data = dict(
 evaluation = dict(interval=1, save_best='mAP@0.5IOU')
 
 # Training Schedule
-optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-05) # Modified as per reccomendations: lr was 0.015
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-05) # Modified Learning Rate
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 
 lr_config = dict(
