@@ -12,6 +12,8 @@ The script is modified from the [original](https://github.com/open-mmlab/mmactio
   5. Reduced Learning Rate and number of Epochs
 Note, there are no architectural changes
 
+**N.B.**: To Use it, you must search and replace some variables as per below
+
 Usage (from within MMAction2 directory):
   python tools/train.py <path/to/this/config> --validate --seed 0 --deterministic
 """
@@ -21,10 +23,10 @@ Usage (from within MMAction2 directory):
 _base_ = ['backbone.base.py']
 
 # Paths Config
-Source_Root = '/media/veracrypt4/Q1/Snippets/Sample'  # Path to root source of data
-Feature_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'  # Path to where Feature-Bank is stored
-Output_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'   # Working Directory
-Model_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Results/Video Processing/Models/LFB/models/inference.base.pth'
+Source_Root = '<SOURCE>'  # Path to root source of data
+Feature_Path = '<FEATUREBANK>'  # Path to where Feature-Bank is stored
+Model_Path = '<MODELINIT>' # Initial Model
+Output_Path = '<MODELOUT>'   # Working Directory
 Frames_Offset = 'Frames'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'
@@ -110,7 +112,7 @@ val_pipeline = [ # The testing is w/o. any cropping / flipping
 
 # Data Definition
 data = dict(
-    videos_per_gpu=1,
+    videos_per_gpu=4,
     workers_per_gpu=2,
     val_dataloader=dict(videos_per_gpu=1),
     test_dataloader=dict(videos_per_gpu=1),
@@ -157,7 +159,7 @@ lr_config = dict(
     warmup_by_epoch=True,
     warmup_iters=5,
     warmup_ratio=0.1)
-total_epochs = 5
+total_epochs = 1
 checkpoint_config = dict(interval=1)
 
 

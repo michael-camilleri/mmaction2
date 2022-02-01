@@ -65,7 +65,7 @@ infer_pipeline = [
 # Data Definition
 data = dict(
     videos_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=2,
     test=dict(
         type='AVADataset',
         num_classes=9,
