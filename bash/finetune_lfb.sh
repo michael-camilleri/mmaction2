@@ -47,9 +47,9 @@ DATA_HOME=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
 mkdir -p ${DATA_HOME}
 echo "    .. Training Set .. "
-rsync --archive --update --compress --progress ${HOME}/data/behaviour/Train ${DATA_HOME}/
+rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${DATA_HOME}/
 echo "    .. Validation Set .. "
-rsync --archive --update --compress --progress ${HOME}/data/behaviour/Validate ${DATA_HOME}/
+rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${DATA_HOME}/
 echo "    Data Done!"
 echo " ------------------------------"
 echo "  -> Synchronising Models"
@@ -131,7 +131,7 @@ echo " ===================================="
 OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
 echo " Copying Results to ${OUT_NAME}"
 mkdir -p "${HOME}/models/LFB/Trained/${OUT_NAME}"
-rsync --archive --update --compress --progress "${MODEL_HOME}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+rsync --archive --update --compress --info=progress2 "${MODEL_HOME}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
 rm -rf ${MODEL_HOME}/out
 echo "   ALL DONE! Hurray!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${HOME}/models/LFB/Trained/${OUT_NAME}'."
