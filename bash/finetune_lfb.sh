@@ -12,7 +12,7 @@
 #
 #  USAGE:
 #     (Should be run from MMAction2 Directory)
-#     srun --time=08:00:00 --gres=gpu:4 bash/finetune_lfb.sh 4 4 1 0.0002 &> ~/logs/lfb.test.out
+#     srun --time=23:00:00 --gres=gpu:4 bash/finetune_lfb.sh 4 4 100 0.0004 &> ~/logs/lfb.04.out
 #
 #  Data Structures
 #    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
@@ -43,36 +43,36 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
-DATA_HOME=${SCRATCH_HOME}/data/behaviour
+SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
-mkdir -p ${DATA_HOME}
+mkdir -p ${SCRATCH_DATA}
 echo "    .. Training Set .. "
-rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${DATA_HOME}/
+rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
 echo "    .. Validation Set .. "
-rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${DATA_HOME}/
+rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${SCRATCH_DATA}/
 echo "    Data Done!"
 echo " ------------------------------"
 echo "  -> Synchronising Models"
-MODEL_HOME=${SCRATCH_HOME}/models/lfb
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
 echo "   .. Copying Models .. "
-rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${MODEL_HOME}/
+rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
-rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${MODEL_HOME}/
+rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update General FB Config
-sed -i "s@<SOURCE>@${DATA_HOME}@" ${MODEL_HOME}/feature_bank.base.py
-sed -i "s@<OUTPUT>@${DATA_HOME}/feature_bank@" ${MODEL_HOME}/feature_bank.base.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.py
+sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.base.py
 #  Update V-Specific FB Config
-cp ${MODEL_HOME}/feature_bank.base.py ${MODEL_HOME}/feature_bank.base.train.py
+cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.train.py
 sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
 #  Update T-Specific FB Config
-cp ${MODEL_HOME}/feature_bank.base.py ${MODEL_HOME}/feature_bank.base.valid.py
+cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
 #  Update Training FB Config
-sed -i "s@<SOURCE>@${DATA_HOME}@" ${MODEL_HOME}/train.base.py
-sed -i "s@<FEATUREBANK>@${DATA_HOME}/feature_bank@" ${MODEL_HOME}/train.base.py
-sed -i "s@<MODELINIT>@${MODEL_HOME}/inference.base.pth@" ${MODEL_HOME}/train.base.py
-sed -i "s@<MODELOUT>@${MODEL_HOME}/out@" ${MODEL_HOME}/train.base.py
-mkdir -p ${MODEL_HOME}/out
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.base.py
+sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.base.py
+sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.base.py
+sed -i "s@<MODELOUT>@${SCRATCH_MODELS}/out@" ${SCRATCH_MODELS}/train.base.py
+mkdir -p ${SCRATCH_MODELS}/out
 echo "    Models Done!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
 echo ""
@@ -84,30 +84,30 @@ echo ""
 echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
-if [ -f "${DATA_HOME}/feature_bank/lfb_Train.pkl" ]; then
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ]; then
     echo "    Training Feature Bank exists: Skipping"
 else
     python tools/test.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-        --out ${DATA_HOME}/feature_bank/train.csv
+        --out ${SCRATCH_DATA}/feature_bank/train.csv
     echo "    Training FB Done"
 fi
 echo " ------------------------------"
 echo "  -> Validation Set"
-if [ -f "${DATA_HOME}/feature_bank/lfb_Validate.pkl" ]; then
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ]; then
     echo "    Validation Feature Bank exists: Skipping"
 else
     python tools/test.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-        --out ${DATA_HOME}/feature_bank/validate.csv
+        --out ${SCRATCH_DATA}/feature_bank/validate.csv
     echo "    Validation FB Done"
 fi
 echo " ------------------------------"
 echo "  -> Cleaning up"
-rm -rf ${DATA_HOME}/feature_bank/_lfb_*
-rm -rf ${DATA_HOME}/feature_bank/*.csv
+rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
+rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
 echo " == All Done =="
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
 echo ""
@@ -118,7 +118,7 @@ echo ""
 echo " ===================================="
 echo " Training Model with ${1} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${3} epochs"
 python -m torch.distributed.launch --nproc_per_node=${1} tools/train.py \
-    ${MODEL_HOME}/train.base.py --launcher pytorch \
+    ${SCRATCH_MODELS}/train.base.py --launcher pytorch \
     --validate --seed 0 --deterministic \
     --cfg-options data.videos_per_gpu=${2} total_epochs=${3} optimizer.lr=${LEARN_RATE}
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
@@ -129,10 +129,12 @@ echo ""
 # ===========
 echo " ===================================="
 OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
-echo " Copying Results to ${OUT_NAME}"
+echo " Copying Model Weights to ${OUT_NAME}"
 mkdir -p "${HOME}/models/LFB/Trained/${OUT_NAME}"
-rsync --archive --update --compress --info=progress2 "${MODEL_HOME}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
-rm -rf ${MODEL_HOME}/out
+rsync --archive --update --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+echo " Copying also LFB Features"
+rsync --archive --update --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+rm -rf ${SCRATCH_MODELS}/out
 echo "   ALL DONE! Hurray!"
 mail -s "Train_LFB:Progress" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${HOME}/models/LFB/Trained/${OUT_NAME}'."
 conda deactivate
