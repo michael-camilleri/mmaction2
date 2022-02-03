@@ -16,15 +16,10 @@
 #    Data is expected to be under ${HOME}/data/behaviour/Test
 #    Model PTHs are under ${HOME}/models/LFB/Trained/: Configs are part of the Repository
 
-# Do some Calculations/Preprocessing
-let "BATCH_SIZE=$1 * $2"
-LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
-OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
-
 # ===================
 # Environment setup
 # ===================
-echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST} with ${1} GPU(s): Config=${OUT_NAME}"
+echo "Setting up Conda enviroment on ${SLURM_JOB_NODELIST}"
 set -e # Make script bail out after first error
 source activate py3mma   # Activate Conda Environment
 echo "Libraries from: ${LD_LIBRARY_PATH}"
@@ -43,13 +38,10 @@ echo ""
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
+echo "  -> Synchronising Data"
 if [ "${5,,}" = "y" ]; then
-  echo "  -> Synchronising Data"
   mkdir -p ${SCRATCH_DATA}
-  echo "    .. Training Set .. "
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
-  echo "    .. Validation Set .. "
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${SCRATCH_DATA}/
+  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Test ${SCRATCH_DATA}/
   echo "    == Data Copied =="
 else
   echo "    == Data is assumed Synchronised =="
@@ -60,6 +52,7 @@ SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
+rsync --archive --update --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update General FB Config
@@ -77,8 +70,8 @@ sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.b
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.base.py
 sed -i "s@<MODELOUT>@${SCRATCH_MODELS}/out@" ${SCRATCH_MODELS}/train.base.py
 mkdir -p ${SCRATCH_MODELS}/out
-echo "    Models Done!"
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models"
+echo "    == Models Done =="
+mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
 
 # ======================
@@ -89,30 +82,30 @@ echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
 if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ]; then
-    echo "    Training Feature Bank exists: Skipping"
+    echo "    == Training FB Exists =="
 else
     python tools/test.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/train.csv
-    echo "    Training FB Done"
+    echo "    == Training FB Done =="
 fi
 echo " ------------------------------"
 echo "  -> Validation Set"
 if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ]; then
-    echo "    Validation Feature Bank exists: Skipping"
+    echo "    == Validation FB Exists =="
 else
     python tools/test.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/validate.csv
-    echo "    Validation FB Done"
+    echo "    == Validation FB Done =="
 fi
 echo " ------------------------------"
 echo "  -> Cleaning up"
 rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
 rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
-echo " == All Done =="
+echo "  == FB Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
 echo ""
 
@@ -125,6 +118,7 @@ python -m torch.distributed.launch --nproc_per_node=${1} tools/train.py \
     ${SCRATCH_MODELS}/train.base.py --launcher pytorch \
     --validate --seed 0 --deterministic \
     --cfg-options data.videos_per_gpu=${2} total_epochs=${3} optimizer.lr=${LEARN_RATE}
+echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
 
@@ -138,6 +132,6 @@ rsync --archive --update --compress --info=progress2 "${SCRATCH_MODELS}/out/" "$
 echo " Copying also LFB Features"
 rsync --archive --update --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
 rm -rf ${SCRATCH_MODELS}/out
-echo "   ALL DONE! Hurray!"
+echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${HOME}/models/LFB/Trained/${OUT_NAME}'."
 conda deactivate

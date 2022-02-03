@@ -13,7 +13,7 @@
 #                        to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:4 --nodelist=charles11 bash/finetune_lfb.sh 4 4 100 0.0001 N &> ~/logs/lfb.01.out
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles11 bash/finetune_lfb.sh 4 4 100 0.0001 N &> ~/logs/lfb.01.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 
@@ -48,8 +48,8 @@ echo ""
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
+echo "  -> Synchronising Data"
 if [ "${5,,}" = "y" ]; then
-  echo "  -> Synchronising Data"
   mkdir -p ${SCRATCH_DATA}
   echo "    .. Training Set .. "
   rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
