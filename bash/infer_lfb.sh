@@ -2,27 +2,22 @@
 #  Author: Michael Camilleri
 #
 #  Scope:
-#     Fine-Tunes the LFB model (no explicit LFB/Backbone training beyond what goes on in backprop)
+#     Runs inference on the Test-Set
 #
-#  Script takes the following parameters
-#     [Cores] - Number of GPUs to use to Train Model
-#     [Images] - Number of Images per-GPU
-#     [Epochs] - Maximum Number of Epochs to train for
-#     [Rate] - Base Learning Rate (per sample, to be multiplied by batch size)
-#     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is highly recommended
-#                        to set the machine (as per below)
+#  Script takes the following parameter
+#     [Model] - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:4 bash/finetune_lfb.sh 4 4 100 0.0004 &> ~/logs/lfb.04.out
+#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0001/epoch_15.pth &> ~/logs/lfb.tst.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
-
+#
 #  Data Structures
-#    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
-#    Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
+#    Data is expected to be under ${HOME}/data/behaviour/Test
+#    Model PTHs are under ${HOME}/models/LFB/Trained/: Configs are part of the Repository
 
 # Do some Calculations/Preprocessing
-BATCH_SIZE=$(echo "${1} * ${2}" | bc)
+let "BATCH_SIZE=$1 * $2"
 LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
 OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
 
