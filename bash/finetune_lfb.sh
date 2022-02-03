@@ -55,6 +55,7 @@ echo " ------------------------------"
 echo "  -> Synchronising Models"
 SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
 echo "   .. Copying Models .. "
+mkdir -p ${SCRATCH_MODELS}
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
