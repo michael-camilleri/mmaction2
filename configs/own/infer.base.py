@@ -16,16 +16,16 @@ Usage (from within MMAction2 directory):
 _base_ = ['backbone.base.py']
 
 # Paths Config
-Source_Root = '/media/veracrypt4/Q1/Snippets/Sample'  # Path to root source of data
-Feature_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'  # Path to where Feature-Bank is stored
-Output_Path = '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'   # Working Directory
+Source_Root = '<SOURCE>'  # Path to root source of data
+Feature_Path = '<FEATUREBANK>'  # Path to where Feature-Bank is stored
+Output_Path = '<RESULTS>'   # Working Directory
 Frames_Offset = 'Frames'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'
 Detections_File = 'Detections.pkl'
 
 # Other Config
-DataSet = 'Validate' # [Test|Validate]
+DataSet = 'Test' # [Test|Validate]
 ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 max_num_sampled_feat = 5
 window_size = 60

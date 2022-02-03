@@ -13,7 +13,7 @@
 #                        to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles11 bash/finetune_lfb.sh 4 4 100 0.0001 N &> ~/logs/lfb.01.out
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0.0004 N &> ~/logs/lfb.04.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 
@@ -70,10 +70,10 @@ rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH
 #  Update General FB Config
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.base.py
-#  Update V-Specific FB Config
+#  Update T-Specific FB Config
 cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.train.py
 sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
-#  Update T-Specific FB Config
+#  Update V-Specific FB Config
 cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
 #  Update Training FB Config
@@ -97,8 +97,8 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ]; then
     echo "    == Training FB Exists =="
 else
     python tools/test.py \
-        ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py \
-        ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+        ${SCRATCH_MODELS}/feature_bank.base.train.py \
+        ${SCRATCH_MODELS}/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/train.csv
     echo "    == Training FB Done =="
 fi
