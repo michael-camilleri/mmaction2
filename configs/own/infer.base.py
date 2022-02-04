@@ -25,7 +25,7 @@ Label_File = 'Actions.pbtxt'
 Detections_File = 'Detections.pkl'
 
 # Other Config
-DataSet = 'Test' # [Test|Validate]
+DataSet = '<DATASET>' # [Test|Validate]
 ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 max_num_sampled_feat = 5
 window_size = 60

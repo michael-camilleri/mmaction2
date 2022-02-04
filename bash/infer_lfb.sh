@@ -64,7 +64,7 @@ rsync --archive --update --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MO
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update FB Config
-cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.eval.py
+mv ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.base.eval.py
 sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
@@ -72,6 +72,7 @@ sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.base.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.base.py
 sed -i "s@<RESULTS>@${SCRATCH_DATA}/out@" ${SCRATCH_MODELS}/infer.base.py
+sed -i "s@<DATASET>@${2}@" ${SCRATCH_MODELS}/infer.base.py
 mkdir -p ${SCRATCH_DATA}/out
 echo "    == Models Done =="
 mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
