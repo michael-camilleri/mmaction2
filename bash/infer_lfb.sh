@@ -6,7 +6,7 @@
 #
 #  Script takes the following parameter
 #     [Model] - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
-#     [Which] - Which DataSet to evaluate (Test/Validate)
+#     [Which] - Which DataSet to evaluate (Test/Validate/Train)
 #     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is highly recommended
 #                        to set the machine (as per below)
 #
