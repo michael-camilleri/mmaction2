@@ -47,7 +47,7 @@ SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
 if [ "${3,,}" = "y" ]; then
   mkdir -p ${SCRATCH_DATA}
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Test ${SCRATCH_DATA}/
+  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/${2} ${SCRATCH_DATA}/
   echo "    == Data Copied =="
 else
   echo "    == Data is assumed Synchronised =="
