@@ -105,12 +105,12 @@ echo ""
 # Infer Behaviours
 # ================
 echo " ===================================="
-echo " Inferring Behaviours for ${2} using model ${CONFIG_NAME}"
+echo " Inferring Behaviours for ${2} using model ${1}"
 mkdir -p "${SCRATCH_DATA}/out/${CONFIG_NAME}"
 python tools/test.py \
     ${SCRATCH_HOME}/models/lfb/infer.base.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_DATA}/out/${CONFIG_NAME}/${2}.csv
+    --out ${SCRATCH_DATA}/out/${2}.csv
 echo "   == Inference Done =="
 mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""
