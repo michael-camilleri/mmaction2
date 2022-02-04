@@ -11,7 +11,7 @@
 #                        to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0016/best_mAP@0.5IOU_epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
+#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0016/epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
