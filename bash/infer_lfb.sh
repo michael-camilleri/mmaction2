@@ -11,7 +11,7 @@
 #                        to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0016/epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
+#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_.0016/epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -64,10 +64,10 @@ rsync --archive --update --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MO
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update FB Config
-cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.eval.py
+cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
-sed -i "s@<DATASET>@Test@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
+sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
 #  Update Inference Config
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.base.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.base.py
