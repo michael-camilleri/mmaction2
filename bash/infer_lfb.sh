@@ -11,7 +11,7 @@
 #                        to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0001/epoch_15.pth Validate N &> ~/logs/lfb.tst.out
+#     srun --time=04:00:00 --gres=gpu:1 bash/infer_lfb.sh 100_16_0.0016/best_mAP@0.5IOU_epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -104,13 +104,14 @@ echo ""
 # Infer Behaviours
 # ================
 echo " ===================================="
-echo " Inferring Behaviours for ${2}"
+echo " Inferring Behaviours for ${2} using model ${CONFIG_NAME}"
+mkdir -p "${SCRATCH_DATA}/out/${CONFIG_NAME}"
 python tools/test.py \
     ${SCRATCH_HOME}/models/lfb/infer.base.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_DATA}/out/${2}.csv
+    --out ${SCRATCH_DATA}/out/${CONFIG_NAME}/${2}.csv
 echo "   == Inference Done =="
-mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inferece Completed."
+mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""
 
 # ===========
