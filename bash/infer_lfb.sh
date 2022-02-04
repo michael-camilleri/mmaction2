@@ -67,7 +67,7 @@ rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH
 cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
-sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
+sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.eval.py
 #  Update Inference Config
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.base.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.base.py
@@ -87,7 +87,7 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" ]; then
     echo "    == ${2} FB Exists =="
 else
     python tools/test.py \
-        ${SCRATCH_MODELS}/feature_bank.base.eval.py \
+        ${SCRATCH_MODELS}/feature_bank.eval.py \
         ${SCRATCH_MODELS}/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/eval.csv
     echo "    == ${2} FB Done =="
