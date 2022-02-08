@@ -59,10 +59,10 @@ SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 # Copy the FB Inference Model and the Training Model (separately)
-rsync --archive --update --compress ${HOME}/models/LFB/Base/feature_bank.base.pth ${SCRATCH_MODELS}/feature_bank.base.pth
-rsync --archive --update --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MODELS}/inference.trained.pth
+rsync --archive --compress ${HOME}/models/LFB/Base/feature_bank.base.pth ${SCRATCH_MODELS}/feature_bank.base.pth
+rsync --archive --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MODELS}/inference.trained.pth
 echo "   .. Synchronising and Formatting Configs .. "
-rsync --archive --update --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
+rsync --archive --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update FB Config
 mv ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.eval.py
@@ -121,9 +121,9 @@ echo ""
 echo " ===================================="
 echo " Copying Results to ${CONFIG_NAME}"
 mkdir -p "${HOME}/results/LFB/${CONFIG_NAME}"
-rsync --archive --update --compress "${SCRATCH_DATA}/out/" "${HOME}/results/LFB/${CONFIG_NAME}"
+rsync --archive --compress "${SCRATCH_DATA}/out/" "${HOME}/results/LFB/${CONFIG_NAME}"
 echo " Copying also LFB Features for posterity"
-rsync --archive --update --compress "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" "${HOME}/results/LFB/${CONFIG_NAME}/"
+rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" "${HOME}/results/LFB/${CONFIG_NAME}/"
 rm -rf ${SCRATCH_DATA}/out
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Outputs copied to '${HOME}/results/LFB/${CONFIG_NAME}'."
