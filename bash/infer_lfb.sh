@@ -62,7 +62,6 @@ mkdir -p ${SCRATCH_MODELS}
 rsync --archive --compress ${HOME}/models/LFB/Base/feature_bank.base.pth ${SCRATCH_MODELS}/feature_bank.base.pth
 rsync --archive --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MODELS}/inference.trained.pth
 echo "   .. Synchronising and Formatting Configs .. "
-rsync --archive --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
 #  Update Feature-Bank Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
