@@ -66,6 +66,7 @@ echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
+cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
 #  Update T-Specific Feature-Bank Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
