@@ -64,23 +64,24 @@ echo "  -> Synchronising Models"
 SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
-rsync --archive --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
+rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
-rsync --archive --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
-#  Update General FB Config
-sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.py
-sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.base.py
-#  Update T-Specific FB Config
-cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.train.py
-sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.train.py
+#  Update T-Specific Feature-Bank Config
+cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.train.py
 #  Update V-Specific FB Config
-cp ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.valid.py
-sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py
+cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py
 #  Update Training FB Config
-sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.base.py
-sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.base.py
-sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.base.py
-sed -i "s@<MODELOUT>@${SCRATCH_MODELS}/out@" ${SCRATCH_MODELS}/train.base.py
+cp ${HOME}/code/MMAction/configs/own/train.base.py ${SCRATCH_MODELS}/train.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<MODELOUT>@${SCRATCH_MODELS}/out@" ${SCRATCH_MODELS}/train.py
 mkdir -p ${SCRATCH_MODELS}/out
 echo "    == Models Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
@@ -97,7 +98,7 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ]; then
     echo "    == Training FB Exists =="
 else
     python tools/test.py \
-        ${SCRATCH_MODELS}/feature_bank.base.train.py \
+        ${SCRATCH_MODELS}/feature_bank.train.py \
         ${SCRATCH_MODELS}/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/train.csv
     echo "    == Training FB Done =="
@@ -108,7 +109,7 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ]; then
     echo "    == Validation FB Exists =="
 else
     python tools/test.py \
-        ${SCRATCH_HOME}/models/lfb/feature_bank.base.valid.py \
+        ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
         ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/validate.csv
     echo "    == Validation FB Done =="
@@ -127,7 +128,7 @@ echo ""
 echo " ===================================="
 echo " Training Model with ${1} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${3} epochs"
 python -m torch.distributed.launch --nproc_per_node=${1} tools/train.py \
-    ${SCRATCH_MODELS}/train.base.py --launcher pytorch \
+    ${SCRATCH_MODELS}/train.py --launcher pytorch \
     --validate --seed 0 --deterministic \
     --cfg-options data.videos_per_gpu=${2} total_epochs=${3} optimizer.lr=${LEARN_RATE}
 echo "   == Training Done =="

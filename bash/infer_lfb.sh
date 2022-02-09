@@ -63,16 +63,17 @@ rsync --archive --compress ${HOME}/models/LFB/Base/feature_bank.base.pth ${SCRAT
 rsync --archive --compress ${HOME}/models/LFB/Trained/${1} ${SCRATCH_MODELS}/inference.trained.pth
 echo "   .. Synchronising and Formatting Configs .. "
 rsync --archive --compress ${HOME}/code/MMAction/configs/own/ ${SCRATCH_MODELS}/
-#  Update FB Config
-mv ${SCRATCH_MODELS}/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.base.eval.py
-sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.base.eval.py
-sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.base.eval.py
-sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.base.eval.py
+#  Update Feature-Bank Config
+cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<DATASET>@${2}@" ${SCRATCH_HOME}/models/lfb/feature_bank.eval.py
 #  Update Inference Config
-sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.base.py
-sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.base.py
-sed -i "s@<RESULTS>@${SCRATCH_DATA}/out@" ${SCRATCH_MODELS}/infer.base.py
-sed -i "s@<DATASET>@${2}@" ${SCRATCH_MODELS}/infer.base.py
+cp ${HOME}/code/MMAction/configs/own/infer.base.py ${SCRATCH_MODELS}/infer.py
+sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<RESULTS>@${SCRATCH_DATA}/out@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<DATASET>@${2}@" ${SCRATCH_MODELS}/infer.py
 mkdir -p ${SCRATCH_DATA}/out
 echo "    == Models Done =="
 mail -s "Infer_LFB for ${2} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
@@ -88,7 +89,7 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" ]; then
     echo "    == ${2} FB Exists =="
 else
     python tools/test.py \
-        ${SCRATCH_MODELS}/feature_bank.base.eval.py \
+        ${SCRATCH_MODELS}/feature_bank.eval.py \
         ${SCRATCH_MODELS}/feature_bank.base.pth \
         --out ${SCRATCH_DATA}/feature_bank/eval.csv
     echo "    == ${2} FB Done =="
@@ -108,7 +109,7 @@ echo " ===================================="
 echo " Inferring Behaviours for ${2} using model ${1}"
 mkdir -p "${SCRATCH_DATA}/out/${CONFIG_NAME}"
 python tools/test.py \
-    ${SCRATCH_HOME}/models/lfb/infer.base.py \
+    ${SCRATCH_HOME}/models/lfb/infer.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
     --out ${SCRATCH_DATA}/out/${2}.csv
 echo "   == Inference Done =="
