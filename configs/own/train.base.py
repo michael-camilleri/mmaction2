@@ -34,7 +34,11 @@ Detections_File = 'Detections.pkl'
 
 # Other Config
 DataSet_Modes = ('Train', 'Validate')
-ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
+ImageNormalisation = dict(
+    mean=[69.199, 69.199, 69.199],
+    std=[58.567, 58.567, 58.567],
+    to_bgr=False
+) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 max_num_sampled_feat = 5
 window_size = 60
 lfb_channels = 2048
@@ -68,6 +72,7 @@ model = dict(
         bbox_head=dict(
                 in_channels=2560,
                 num_classes=9,   # Changed from 81
+                multilabel=False, # Changed from multilabel=True
         )
     )
 )
@@ -81,7 +86,7 @@ train_pipeline = [
     dict(type='RandomCrop', size=256),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
-    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet detectors
+    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet dets
     dict(type='ToTensor', keys=['img', 'proposals', 'gt_bboxes', 'gt_labels']),
     dict(
         type='ToDataContainer',
@@ -100,7 +105,7 @@ val_pipeline = [ # The testing is w/o. any cropping / flipping
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
-    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet detectors
+    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet dets
     dict(type='ToTensor', keys=['img', 'proposals']),
     dict(type='ToDataContainer', fields=[dict(key='proposals', stack=False)]),
     dict(
@@ -149,7 +154,7 @@ data = dict(
 evaluation = dict(interval=1, save_best='mAP@0.5IOU')
 
 # Training Schedule
-optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-05) # Modified Learning Rate
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-05) # Modified LR
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 
 lr_config = dict(
