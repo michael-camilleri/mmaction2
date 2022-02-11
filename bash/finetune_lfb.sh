@@ -24,7 +24,7 @@
 # Do some Calculations/Preprocessing
 BATCH_SIZE=$(echo "${1} * ${2}" | bc)
 LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
-OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}
+OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}_S
 
 # ===================
 # Environment setup
