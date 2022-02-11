@@ -6,7 +6,6 @@ backbone.base.pth): before using it, one is expected to have generated the featu
 using feature_bank.base.py.
 
 The script is a rehash of train.base.py, focusing on a Testing Set
-Note, there are no architectural changes
 
 Usage (from within MMAction2 directory):
   python tools/test.py <path/to/this/config> <path/to/model/pth> --out results.csv
@@ -64,8 +63,10 @@ model = dict(
         bbox_head=dict(
                 in_channels=2560,
                 num_classes=9,   # Changed from 81
+                multilabel=False, # Enforce single-label
         )
-    )
+    ),
+    test_cfg=dict(rcnn=dict(action_thr=-1.0)) # Changed from 0.002 for single-label
 )
 
 

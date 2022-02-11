@@ -10,7 +10,8 @@ The script is modified from the [original](https://github.com/open-mmlab/mmactio
   3. Removed flipping as an augmentation
   4. Reduced Videos per gpu to 4 (to avoid memory issues)
   5. Reduced Learning Rate and number of Epochs
-Note, there are no architectural changes
+  6. Set multilabel=False and associated setup
+
 
 **N.B.**: To Use it, you must search and replace some variables as per below
 
@@ -43,7 +44,6 @@ max_num_sampled_feat = 5
 window_size = 60
 lfb_channels = 2048
 
-
 ################## STANDARD VALUES ##################
 
 # Model Head Override
@@ -72,9 +72,10 @@ model = dict(
         bbox_head=dict(
                 in_channels=2560,
                 num_classes=9,   # Changed from 81
-                multilabel=False, # Changed from multilabel=True
+                multilabel=False, # Enforce single-label
         )
-    )
+    ),
+    test_cfg=dict(rcnn=dict(action_thr=-1))
 )
 
 
