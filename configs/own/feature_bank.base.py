@@ -47,7 +47,7 @@ model = dict(
 
 # Feature-Bank Generation Pipeline
 infer_pipeline = [
-    dict(type='SampleAVAFrames', clip_len=4, frame_interval=16),
+    dict(type='SampleAVAFrames', clip_len=4, frame_interval=16, test_mode=True),
     dict(type='RawFrameDecode'),
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),
