@@ -21,8 +21,8 @@ python tools/test.py <path/to/this/config> <path/to/Pytorch/Model> --out <path/t
 _base_ = ['backbone.base.py']
 
 # Paths Config
-Source_Root='<SOURCE>'  # You need to specify data root: e.g. '/media/veracrypt4/Q1/Snippets/Sample'
-Output_Path='<OUTPUT>'  # You need to specify output path: e.g. '/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch'
+Source_Root='<SOURCE>'
+Output_Path='<OUTPUT>'
 Frames_Offset = 'Frames'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'
@@ -31,7 +31,11 @@ Detections_File = 'Detections.pkl'
 # Other Config
 DataSet='<DATASET>' # You need to specify [Train|Validate|Test]
 HalfPrecision = True # [True|False]
-ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
+ImageNormalisation = dict(
+    mean=[69.199, 69.199, 69.199],
+    std=[58.567, 58.567, 58.567],
+    to_bgr=False
+) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 
 
 ################## STANDARD VALUES ##################
@@ -52,7 +56,7 @@ infer_pipeline = [
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
-    dict(type='Rename', mapping=dict(imgs='img')),    # Rename is needed to use mmdet detectors
+    dict(type='Rename', mapping=dict(imgs='img')),    # Rename needed to use mmdet dets
     dict(type='ToTensor', keys=['img', 'proposals']),
     dict(type='ToDataContainer', fields=[dict(key='proposals', stack=False)]),
     dict(

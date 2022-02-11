@@ -1,11 +1,11 @@
 """
 This config is used to infer from an LFB model.
 
-It should be used in conjunction with a `feature_bank`-type model (e.g. backbone.base.pth): before
-using it, one is expected to have generated the feature-bank using feature_bank.base.py.
+It should be used in conjunction with a `feature_bank`-type model (e.g.
+backbone.base.pth): before using it, one is expected to have generated the feature-bank
+using feature_bank.base.py.
 
 The script is a rehash of train.base.py, focusing on a Testing Set
-Note, there are no architectural changes
 
 Usage (from within MMAction2 directory):
   python tools/test.py <path/to/this/config> <path/to/model/pth> --out results.csv
@@ -26,7 +26,11 @@ Detections_File = 'Detections.pkl'
 
 # Other Config
 DataSet = '<DATASET>' # [Test|Validate]
-ImageNormalisation = dict(mean=[69.199, 69.199, 69.199], std=[58.567, 58.567, 58.567], to_bgr=False) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
+ImageNormalisation = dict(
+    mean=[69.199, 69.199, 69.199],
+    std=[58.567, 58.567, 58.567],
+    to_bgr=False
+) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 max_num_sampled_feat = 5
 window_size = 60
 lfb_channels = 2048
@@ -59,8 +63,10 @@ model = dict(
         bbox_head=dict(
                 in_channels=2560,
                 num_classes=9,   # Changed from 81
+                multilabel=False, # Enforce single-label
         )
-    )
+    ),
+    test_cfg=dict(rcnn=dict(action_thr=-1.0)) # Changed from 0.002 for single-label
 )
 
 
@@ -71,7 +77,7 @@ infer_pipeline = [ # The testing is w/o. any cropping / flipping
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
-    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet detectors
+    dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet dets
     dict(type='ToTensor', keys=['img', 'proposals']),
     dict(type='ToDataContainer', fields=[dict(key='proposals', stack=False)]),
     dict(
