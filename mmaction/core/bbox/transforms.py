@@ -6,16 +6,22 @@ def bbox2result(bboxes, labels, num_classes, thr=0.01):
     """
     Convert detection results to a list of numpy arrays.
 
-    This identifies single-label classification (as opposed to multi-label) through the thr
-    parameter which is set to a negative value
+    This identifies single-label classification (as opposed to multi-label)
+    through the thr parameter which is set to a negative value.
 
-    TODO: Make more efficient
+    Currently, the way to set this is to set
+       `test_cfg.rcnn.action_thr=-1.0`
+    The ideal way, however, which is not yet implemented, is to have another
+    metric, mAP@top1 and set that within:
+       `evaluation.metrics=[...,'mAP@top1',...]`
+
     Args:
         bboxes (Tensor): shape (n, 4)
         labels (Tensor): shape (n, #num_classes)
         num_classes (int): class number, including background class
         thr (float): The score threshold used when converting predictions to
-            detection results. If a single negative value, uses single-label classification
+            detection results. If a single negative value, uses single-label
+            classification
     Returns:
         list(ndarray): bbox results of each class
     """
@@ -25,7 +31,7 @@ def bbox2result(bboxes, labels, num_classes, thr=0.01):
     bboxes = bboxes.cpu().numpy()
     scores = labels.cpu().numpy()  # rename for clarification
 
-    # Although we can handle single-label classification, we still want to have scores
+    # Although we can handle single-label classification, we still want scores
     assert scores.shape[-1] > 1
 
     # Robustly check for multi/single-label:
@@ -33,7 +39,7 @@ def bbox2result(bboxes, labels, num_classes, thr=0.01):
         multilabel = thr >= 0
         thr = (thr,) * num_classes
     else:
-        multilabel = False
+        multilabel = True
 
     # Check Shape
     assert scores.shape[1] == num_classes
@@ -41,9 +47,14 @@ def bbox2result(bboxes, labels, num_classes, thr=0.01):
 
     result = []
     for i in range(num_classes - 1):
-        where = (scores[:, i + 1] > thr[i + 1]) if multilabel else (
-                    scores[:, 1:].argmax(axis=1) == i)
+        if multilabel:
+            where = (scores[:, i + 1] > thr[i + 1])
+        else:
+            where = (scores[:, 1:].argmax(axis=1) == i)
         result.append(
-            np.concatenate((bboxes[where, :4], scores[where, i + 1:i + 2]), axis=1)
+            np.concatenate(
+                (bboxes[where, :4], scores[where, i + 1:i + 2]),
+                axis=1
+            )
         )
     return result
