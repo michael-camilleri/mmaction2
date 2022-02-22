@@ -12,9 +12,9 @@ def bbox2result(bboxes, labels, num_classes, thr=0.01):
     Currently, the way to set this is to set
        `test_cfg.rcnn.action_thr=-1.0`
     ToDo: The ideal way would be for this to be automatically set when the
-    model cfg uses multilabel=False, however this could be a breaking change
+    model cfg uses multilabel=False, however this would be a breaking change
     and is left as a future exercise.
-    NB - this should not interfere with the evaluation in any case.
+    NB: this should not interfere with the evaluation in any case.
 
     Args:
         bboxes (Tensor): shape (n, 4)
