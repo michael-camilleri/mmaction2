@@ -9,4 +9,3 @@ packaging
 pims
 PyTurboJPEG
 timm
-packaging
