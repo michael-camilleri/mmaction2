@@ -21,9 +21,9 @@ python tools/test.py <path/to/this/config> <path/to/Pytorch/Model> --out <path/t
 _base_ = ['backbone.base.py']
 
 # Paths Config
-Source_Root='/media/veracrypt4/Q1/Snippets/Sample'
+Source_Root='/media/veracrypt4/Q1/Snippets/Curated'
 Output_Path='/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch/SampleLFB'
-Frames_Offset = 'Frames'
+Frames_Offset = 'Frames' # 'Videos'
 Annotation_File = 'Behaviours.csv'
 Label_File = 'Actions.pbtxt'
 Detections_File = 'Detections.pkl'
@@ -51,8 +51,9 @@ model = dict(
 
 # Feature-Bank Generation Pipeline
 infer_pipeline = [
+    # dict(type='DecordInit'),  # Trying out with Decord of Video
     dict(type='SampleAVAFrames', clip_len=4, frame_interval=16, test_mode=True),
-    dict(type='RawFrameDecode'),
+    dict(type='RawFrameDecode'),  # dict(type='DecordDecode'),  #
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
