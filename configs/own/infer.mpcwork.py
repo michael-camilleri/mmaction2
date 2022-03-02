@@ -26,8 +26,8 @@ Detections_File = 'Detections.pkl'
 # Other Config
 DataSet = 'Validate' # [Test|Validate]
 ImageNormalisation = dict(
-    mean=[69.199, 69.199, 69.199],
-    std=[58.567, 58.567, 58.567],
+    mean=[69.201, 69.201, 69.201],
+    std=[58.571, 58.571, 58.571],
     to_bgr=False
 ) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 max_num_sampled_feat = 5

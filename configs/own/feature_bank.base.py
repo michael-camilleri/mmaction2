@@ -32,8 +32,8 @@ Detections_File = 'Detections.pkl'
 DataSet='<DATASET>' # You need to specify [Train|Validate|Test]
 HalfPrecision = True # [True|False]
 ImageNormalisation = dict(
-    mean=[69.199, 69.199, 69.199],
-    std=[58.567, 58.567, 58.567],
+    mean=[69.201, 69.201, 69.201],
+    std=[58.571, 58.571, 58.571],
     to_bgr=False
 ) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 
