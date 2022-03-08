@@ -9,11 +9,12 @@
 #     [Images] - Number of Images per-GPU
 #     [Epochs] - Maximum Number of Epochs to train for
 #     [Rate] - Base Learning Rate (per sample, to be multiplied by batch size)
-#     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is highly recommended
-#                        to set the machine (as per below)
+#     [Optimiser] - A/S: Adam (with Cosine Annealing) vs SGD (with Step Schedule)
+#     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is
+#                         highly recommended to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0.0004 N &> ~/logs/lfb.04.out
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0 .0004 A N &> ~/logs/lfb.04.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 
@@ -24,7 +25,7 @@
 # Do some Calculations/Preprocessing
 BATCH_SIZE=$(echo "${1} * ${2}" | bc)
 LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
-OUT_NAME=${3}_${BATCH_SIZE}_${LEARN_RATE}_S
+OUT_NAME=${3}_${BATCH_SIZE}_${5^}_${LEARN_RATE}_S
 
 # ===================
 # Environment setup
@@ -49,7 +50,7 @@ echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
-if [ "${5,,}" = "y" ]; then
+if [ "${6,,}" = "y" ]; then
   mkdir -p ${SCRATCH_DATA}
   echo "    .. Training Set .. "
   rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
@@ -77,8 +78,12 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py
-#  Update Training FB Config
-cp ${HOME}/code/MMAction/configs/own/train.base.py ${SCRATCH_MODELS}/train.py
+#  Update Training FB Config (depending on which optimiser chosen)
+if [ "${5,,}" = "a" ]; then
+  cp ${HOME}/code/MMAction/configs/own/train_adam.base.py ${SCRATCH_MODELS}/train.py
+else
+  cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
+fi
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
