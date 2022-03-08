@@ -53,6 +53,10 @@ The master branch works with **PyTorch 1.3+**.
   </div>
 </div>
 <div align="center">
+  <img src="https://user-images.githubusercontent.com/30782254/155710881-bb26863e-fcb4-458e-b0c4-33cd79f96901.gif" width="580px"/><br>
+    <p style="font-size:1.5vw;">Skeleton-based Spatio-Temporal Action Detection and Action Recognition Results on Kinetics-400</p>
+</div>
+<div align="center">
   <img src="https://github.com/open-mmlab/mmaction2/raw/master/resources/spatio-temporal-det.gif" width="800px"/><br>
     <p style="font-size:1.5vw;">Spatio-Temporal Action Detection Results on AVA-2.1</p>
 </div>
@@ -67,6 +71,7 @@ The master branch works with **PyTorch 1.3+**.
 
 ## Updates
 
+- (2022-03-04) We support **Multigrid** on Kinetics400, achieve 76.07% Top-1 accuracy and accelerate training speed.
 - (2021-11-24) We support **2s-AGCN** on NTU60 XSub, achieve 86.06% Top-1 accuracy on joint stream and 86.89% Top-1 accuracy on bone stream respectively.
 - (2021-10-29) We provide a demo for skeleton-based and rgb-based spatio-temporal detection and action recognition (demo/demo_video_structuralize.py).
 - (2021-10-26) We train and test **ST-GCN** on NTU60 with 3D keypoint annotations, achieve 84.61% Top-1 accuracy (higher than 81.5% in the [paper](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPaper/17135)).
@@ -74,7 +79,7 @@ The master branch works with **PyTorch 1.3+**.
 - (2021-10-25) We provide a [guide](https://github.com/open-mmlab/mmaction2/blob/master/configs/skeleton/posec3d/custom_dataset_training.md) on how to train PoseC3D with custom datasets, [bit-scientist](https://github.com/bit-scientist) authored this PR!
 - (2021-10-16) We support **PoseC3D** on UCF101 and HMDB51, achieves 87.0% and 69.3% Top-1 accuracy with 2D skeletons only. Pre-extracted 2D skeletons are also available.
 
-**Release**: v0.21.0 was released in 31/12/2021. Please refer to [changelog.md](docs/changelog.md) for details and release history.
+**Release**: v0.22.0 was released in 05/03/2022. Please refer to [changelog.md](docs/changelog.md) for details and release history.
 
 ## Installation
 
@@ -280,21 +285,21 @@ We wish that the toolbox and benchmark could serve the growing research communit
 
 ## Projects in OpenMMLab
 
-- [MMCV](https://github.com/open-mmlab/mmcv): OpenMMLab foundational library for computer vision.
-- [MIM](https://github.com/open-mmlab/mim): MIM Installs OpenMMLab Packages.
-- [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation video understanding toolbox and benchmark.
+- [MIM](https://github.com/open-mmlab/mim): MIM installs OpenMMLab packages.
 - [MMClassification](https://github.com/open-mmlab/mmclassification): OpenMMLab image classification toolbox and benchmark.
-- [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMLab Model Deployment Framework.
 - [MMDetection](https://github.com/open-mmlab/mmdetection): OpenMMLab detection toolbox and benchmark.
 - [MMDetection3D](https://github.com/open-mmlab/mmdetection3d): OpenMMLab's next-generation platform for general 3D object detection.
-- [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
-- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab few shot learning toolbox.
-- [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab Optical Flow Toolbox and Benchmark.
-- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
-- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab human pose and shape estimation toolbox and benchmark.
-- [MMOCR](https://github.com/open-mmlab/mmocr): A Comprehensive Toolbox for Text Detection, Recognition and Understanding.
-- [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
-- [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab Model Compression Toolbox and Benchmark.
+- [MMRotate](https://github.com/open-mmlab/mmrotate): OpenMMLab rotated object detection toolbox and benchmark.
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation): OpenMMLab semantic segmentation toolbox and benchmark.
-- [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning Toolbox and Benchmark.
+- [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab text detection, recognition, and understanding toolbox.
+- [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
+- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 3D human parametric model toolbox and benchmark.
+- [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning toolbox and benchmark.
+- [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab model compression toolbox and benchmark.
+- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab fewshot learning toolbox and benchmark.
+- [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation action understanding toolbox and benchmark.
 - [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
+- [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
+- [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
+- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
+- [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMLab model deployment framework.
