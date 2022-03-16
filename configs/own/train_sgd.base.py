@@ -160,7 +160,7 @@ optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 
 lr_config = dict(
     policy='step',
-    step=[10, 15],
+    step=[20, 40],  # Previously [10, 15]
     warmup='linear',
     warmup_by_epoch=True,
     warmup_iters=5,
