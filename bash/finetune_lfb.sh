@@ -56,6 +56,8 @@ if [ "${6,,}" = "y" ]; then
   rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
   echo "    .. Validation Set .. "
   rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${SCRATCH_DATA}/
+  echo "    .. Common Components .. "
+  cp ${HOME}/data/behaviour/{AVA.Actions.pbtxt,STLT.Schema.json,STLT.Sizes.json} ${SCRATCH_DATA}/
   echo "    == Data Copied =="
 else
   echo "    == Data is assumed Synchronised =="
