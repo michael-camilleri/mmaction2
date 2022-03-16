@@ -85,15 +85,11 @@ echo ""
 # ======================
 echo " ===================================="
 echo " Generating Feature-Bank Vectors for ${2}"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" ]; then
-    echo "    == ${2} FB Exists =="
-else
-    python tools/test.py \
-        ${SCRATCH_MODELS}/feature_bank.eval.py \
-        ${SCRATCH_MODELS}/feature_bank.base.pth \
-        --out ${SCRATCH_DATA}/feature_bank/eval.csv
-    echo "    == ${2} FB Done =="
-fi
+python tools/test.py \
+    ${SCRATCH_MODELS}/feature_bank.eval.py \
+    ${SCRATCH_MODELS}/feature_bank.base.pth \
+    --out ${SCRATCH_DATA}/feature_bank/eval.csv
+echo "    == ${2} FB Done =="
 echo " ------------------------------"
 echo "  -> Cleaning up"
 rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*

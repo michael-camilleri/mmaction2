@@ -20,9 +20,9 @@ Source_Root = '<SOURCE>'  # Path to root source of data
 Feature_Path = '<FEATUREBANK>'  # Path to where Feature-Bank is stored
 Output_Path = '<RESULTS>'   # Working Directory
 Frames_Offset = 'Frames'
-Annotation_File = 'Behaviours.csv'
-Label_File = 'Actions.pbtxt'
-Detections_File = 'Detections.pkl'
+Annotation_File = 'AVA.Behaviours.csv'
+Label_File = 'AVA.Actions.pbtxt'
+Detections_File = 'AVA.Detections.pkl'
 
 # Other Config
 DataSet = '<DATASET>' # [Test|Validate]
@@ -100,7 +100,7 @@ data = dict(
         ann_file=f'{Source_Root}/{DataSet}/{Annotation_File}',
         exclude_file=None,
         pipeline=infer_pipeline,
-        label_file=f'{Source_Root}/{DataSet}/{Label_File}',
+        label_file=f'{Source_Root}/{Label_File}',
         proposal_file=f'{Source_Root}/{DataSet}/{Detections_File}',
         person_det_score_thr=0.5,
         data_prefix=f'{Source_Root}/{DataSet}/{Frames_Offset}'

@@ -14,7 +14,7 @@
 #                         highly recommended to set the machine (as per below)
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0 .0004 A N &> ~/logs/lfb.04.out
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0.0004 A N &> ~/logs/lfb.04.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 
@@ -100,26 +100,18 @@ echo ""
 echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ]; then
-    echo "    == Training FB Exists =="
-else
-    python tools/test.py \
-        ${SCRATCH_MODELS}/feature_bank.train.py \
-        ${SCRATCH_MODELS}/feature_bank.base.pth \
-        --out ${SCRATCH_DATA}/feature_bank/train.csv
-    echo "    == Training FB Done =="
-fi
+python tools/test.py \
+    ${SCRATCH_MODELS}/feature_bank.train.py \
+    ${SCRATCH_MODELS}/feature_bank.base.pth \
+    --out ${SCRATCH_DATA}/feature_bank/train.csv
+echo "    == Training FB Done =="
 echo " ------------------------------"
 echo "  -> Validation Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ]; then
-    echo "    == Validation FB Exists =="
-else
-    python tools/test.py \
-        ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
-        ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-        --out ${SCRATCH_DATA}/feature_bank/validate.csv
-    echo "    == Validation FB Done =="
-fi
+python tools/test.py \
+    ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
+    ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+    --out ${SCRATCH_DATA}/feature_bank/validate.csv
+echo "    == Validation FB Done =="
 echo " ------------------------------"
 echo "  -> Cleaning up"
 rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*

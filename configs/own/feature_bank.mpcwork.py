@@ -24,9 +24,9 @@ _base_ = ['backbone.base.py']
 Source_Root='/media/veracrypt4/Q1/Snippets/Curated'
 Output_Path='/home/s1238640/Documents/DataSynced/PhD Project/Data/MRC Harwell/Scratch/SampleLFB'
 Frames_Offset = 'Frames' # 'Videos'
-Annotation_File = 'Behaviours.csv'
-Label_File = 'Actions.pbtxt'
-Detections_File = 'Detections.pkl'
+Annotation_File = 'AVA.Behaviours.csv'
+Label_File = 'AVA.Actions.pbtxt'
+Detections_File = 'AVA.Detections.pkl'
 
 # Other Config
 DataSet='Validate' # You need to specify [Train|Validate|Test]
@@ -80,7 +80,7 @@ data = dict(
         ann_file=f'{Source_Root}/{DataSet}/{Annotation_File}',
         exclude_file=None,
         pipeline=infer_pipeline,
-        label_file=f'{Source_Root}/{DataSet}/{Label_File}',
+        label_file=f'{Source_Root}/{Label_File}',
         proposal_file=f'{Source_Root}/{DataSet}/{Detections_File}',
         person_det_score_thr=0.5,
         data_prefix=f'{Source_Root}/{DataSet}/{Frames_Offset}'))
