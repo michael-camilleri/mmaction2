@@ -103,7 +103,7 @@ data = dict(
         label_file=f'{Source_Root}/{Label_File}',
         proposal_file=f'{Source_Root}/{DataSet}/{Detections_File}',
         person_det_score_thr=0.5,
-        data_prefix=f'{Source_Root}/{DataSet}/{Frames_Offset}'
+        data_prefix=f'{Source_Root}/{Frames_Offset}'
     ),
 )
 

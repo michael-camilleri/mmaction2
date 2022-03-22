@@ -6,16 +6,17 @@
 #
 #  Script takes the following parameters: note that the batch size is defined by the product of
 #    Cores and Images.
-#     [Cores]  - Number of GPUs to use to Train Model
-#     [Images] - Number of Images (Samples) per-GPU
-#     [Rate]   - Learning Rate (actual value used, not dependent on Batch-Size)
-#     [Epochs] - Maximum Number of Epochs to train for
-#     [Offset] - Offset from base data location to retrieve the data splits
-#     [Frames] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
-#                     known that the machine contains the right data splits.
+#     [Cores]    - Number of GPUs to use to Train Model
+#     [Images]   - Number of Images (Samples) per-GPU
+#     [Rate]     - Learning Rate (actual value used, not dependent on Batch-Size)
+#     [Epochs]   - Maximum Number of Epochs to train for
+#     [Offset]   - Offset from base data location to retrieve the data splits
+#     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
+#                       known that the machine contains the right data splits.
+#     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 0.0001 60 Fixed Y &> ~/logs/lfb.04.out
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 0.0001 60 Fixed Y &> ~/logs/train.0001.Fixed.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -82,7 +83,6 @@ sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
-fi
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
@@ -99,18 +99,28 @@ echo ""
 echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
-python tools/test.py \
-    ${SCRATCH_MODELS}/feature_bank.train.py \
-    ${SCRATCH_MODELS}/feature_bank.base.pth \
-    --out ${SCRATCH_DATA}/feature_bank/train.csv
-echo "    == Training FB Done =="
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ] && ["${7,,}" = "n" ]; then
+  echo "    Training FB Exists and not Forced to regenerate: skipping."
+else
+  echo "    Re-Generating"
+  python tools/test.py \
+      ${SCRATCH_MODELS}/feature_bank.train.py \
+      ${SCRATCH_MODELS}/feature_bank.base.pth \
+      --out ${SCRATCH_DATA}/feature_bank/train.csv
+  echo "     Training FB Done"
+fi
 echo " ------------------------------"
 echo "  -> Validation Set"
-python tools/test.py \
-    ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
-    ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
-    --out ${SCRATCH_DATA}/feature_bank/validate.csv
-echo "    == Validation FB Done =="
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && ["${7,,}" = "n" ]; then
+  echo "    Validation FB Exists and not Forced to regenerate: skipping."
+else
+  echo "    Re-Generating"
+  python tools/test.py \
+      ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
+      ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+      --out ${SCRATCH_DATA}/feature_bank/validate.csv
+  echo "     Validation FB Done"
+fi
 echo " ------------------------------"
 echo "  -> Cleaning up"
 rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*

@@ -134,7 +134,7 @@ data = dict(
         label_file=f'{Source_Root}/{Label_File}',
         proposal_file=f'{Source_Root}/Train/{Detections_File}',
         person_det_score_thr=0.5,
-        data_prefix=f'{Source_Root}/Train/{Frames_Offset}'
+        data_prefix=f'{Source_Root}/{Frames_Offset}'
     ),
     val=dict(
         type='AVADataset',
@@ -148,7 +148,7 @@ data = dict(
         label_file=f'{Source_Root}/{Label_File}',
         proposal_file=f'{Source_Root}/Validate/{Detections_File}',
         person_det_score_thr=0.5,
-        data_prefix=f'{Source_Root}/Validate/{Frames_Offset}'
+        data_prefix=f'{Source_Root}/{Frames_Offset}'
     ),
 )
 # data['test'] = data['val']

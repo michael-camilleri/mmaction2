@@ -5,10 +5,10 @@
 #     Runs inference on the Test-Set
 #
 #  Script takes the following parameter
-#     [Model] - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
-#     [Which] - Which DataSet to evaluate (Test/Validate/Train)
-#     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is highly recommended
-#                        to set the machine (as per below)
+#     [Model]  - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
+#     [Which]  - Which DataSet to evaluate (Test/Validate/Train)
+#     [Frames] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
+##                    known that the machine contains the right data splits.
 #
 #  USAGE:
 #     srun --time=04:00:00 --gres=gpu:1 --nodelist=charles17 bash/infer_lfb.sh 100_16_.0016/epoch_11.pth Validate N &> ~/logs/lfb.tst.01.out
@@ -16,11 +16,17 @@
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
 #  Data Structures
-#    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET] is one of Test/Validate
+#    Data is expected to be under ${HOME}/data/behaviour/ which follows the definitions laid out
+#        in my Jupyter notebook.
 #    Model PTHs are under ${HOME}/models/LFB/Trained/: Configs are part of the Repository
 
 # Some Configs
 CONFIG_NAME=$(dirname "${1}")
+if [ "${2,,}" = "test" ]; then
+  PARENT_DIR='Test'
+else
+  PARENT_DIR='Train'
+fi
 
 # ===================
 # Environment setup
@@ -43,15 +49,19 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
-SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
-cp ${HOME}/data/behaviour/{AVA.Actions.pbtxt,STLT.Schema.json,STLT.Sizes.json} ${SCRATCH_DATA}/
+SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
+mkdir -p ${SCRATCH_DATA}
+echo "     .. Schemas .."
+cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
+echo "     .. Annotations .."
+rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
+      --info=progress2 ${HOME}/data/behaviour/${PARENT_DIR}/$3/ ${SCRATCH_DATA}
 if [ "${3,,}" = "y" ]; then
-  mkdir -p ${SCRATCH_DATA}
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/${2} ${SCRATCH_DATA}/
-  echo "    == Frame Data Copied =="
+  echo "     .. Frames .."
+  rsync --archive --update --info=progress2 ${HOME}/data/behaviour/${PARENT_DIR}/Frames ${SCRATCH_DATA}
 else
-  echo "    == Frame Data is assumed Synchronised =="
+  echo "     .. Skipping Frames .."
 fi
 echo " ------------------------------"
 
