@@ -4,28 +4,28 @@
 #  Scope:
 #     Fine-Tunes the LFB model (no explicit LFB/Backbone training beyond what goes on in backprop)
 #
-#  Script takes the following parameters
-#     [Cores] - Number of GPUs to use to Train Model
-#     [Images] - Number of Images per-GPU
+#  Script takes the following parameters: note that the batch size is defined by the product of
+#    Cores and Images.
+#     [Cores]  - Number of GPUs to use to Train Model
+#     [Images] - Number of Images (Samples) per-GPU
+#     [Rate]   - Learning Rate (actual value used, not dependent on Batch-Size)
 #     [Epochs] - Maximum Number of Epochs to train for
-#     [Rate] - Base Learning Rate (per sample, to be multiplied by batch size)
-#     [Optimiser] - A/S: Adam (with Cosine Annealing) vs SGD (with Step Schedule)
-#     [Copy Data] - Y/N: Indicates if data should be copied or not (saves time). In this case, it is
-#                         highly recommended to set the machine (as per below)
+#     [Offset] - Offset from base data location to retrieve the data splits
+#     [Frames] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
+#                     known that the machine contains the right data splits.
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 100 0.0004 A N &> ~/logs/lfb.04.out
-#     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
-#             run on explicitly through the --nodelist=charles<XX> argument
+#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 0.0001 60 Fixed Y &> ~/logs/lfb.04.out
+#     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
-#    Data is expected to be under ${HOME}/data/behaviour/[DATASET] where [DATASET]=Train/Validate
+#    Data is expected to be under ${HOME}/data/behaviour/ which follows the definitions laid out
+#        in my Jupyter notebook.
 #    Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
 
 # Do some Calculations/Preprocessing
 BATCH_SIZE=$(echo "${1} * ${2}" | bc)
-LEARN_RATE=$(echo "${BATCH_SIZE} * $4" | bc)
-OUT_NAME=${3}_${BATCH_SIZE}_${5^}_${LEARN_RATE}_S
+OUT_NAME=${4}_${BATCH_SIZE}_${5^}_${3}_S
 
 # ===================
 # Environment setup
@@ -48,19 +48,19 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
-SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
+SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour/
+mkdir -p ${SCRATCH_DATA}
 echo "  -> Synchronising Data"
+echo "     .. Schemas .."
+cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
+echo "     .. Annotations .."
+rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
+      --info=progress2 ${HOME}/data/behaviour/Train/$5/ ${SCRATCH_DATA}
 if [ "${6,,}" = "y" ]; then
-  mkdir -p ${SCRATCH_DATA}
-  echo "    .. Training Set .. "
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Train ${SCRATCH_DATA}/
-  echo "    .. Validation Set .. "
-  rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/Validate ${SCRATCH_DATA}/
-  echo "    .. Common Components .. "
-  cp ${HOME}/data/behaviour/{AVA.Actions.pbtxt,STLT.Schema.json,STLT.Sizes.json} ${SCRATCH_DATA}/
-  echo "    == Data Copied =="
+  echo "     .. Frames .."
+  rsync --archive --update --info=progress2 ${HOME}/data/behaviour/Train/Frames ${SCRATCH_DATA}
 else
-  echo "    == Data is assumed Synchronised =="
+  echo "     .. Skipping Frames .."
 fi
 echo " ------------------------------"
 echo "  -> Synchronising Models"
@@ -70,7 +70,7 @@ mkdir -p ${SCRATCH_MODELS}
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
 cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
-#  Update T-Specific Feature-Bank Config
+#  Update T-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
@@ -80,11 +80,8 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py
-#  Update Training FB Config (depending on which optimiser chosen)
-if [ "${5,,}" = "a" ]; then
-  cp ${HOME}/code/MMAction/configs/own/train_adam.base.py ${SCRATCH_MODELS}/train.py
-else
-  cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
+#  Update Training FB Config (Now using only SGD)
+cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
 fi
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py

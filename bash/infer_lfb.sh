@@ -45,13 +45,13 @@ echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 echo "  -> Synchronising Data"
+cp ${HOME}/data/behaviour/{AVA.Actions.pbtxt,STLT.Schema.json,STLT.Sizes.json} ${SCRATCH_DATA}/
 if [ "${3,,}" = "y" ]; then
   mkdir -p ${SCRATCH_DATA}
   rsync --archive --update --compress --info=progress2 ${HOME}/data/behaviour/${2} ${SCRATCH_DATA}/
-  cp ${HOME}/data/behaviour/{AVA.Actions.pbtxt,STLT.Schema.json,STLT.Sizes.json} ${SCRATCH_DATA}/
-  echo "    == Data Copied =="
+  echo "    == Frame Data Copied =="
 else
-  echo "    == Data is assumed Synchronised =="
+  echo "    == Frame Data is assumed Synchronised =="
 fi
 echo " ------------------------------"
 
