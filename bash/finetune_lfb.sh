@@ -16,7 +16,7 @@
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:4 --nodelist=charles18 bash/finetune_lfb.sh 4 4 0.0001 60 Fixed Y &> ~/logs/train.0001.Fixed.out
+#     srun --time=1-23:00:00 --gres=gpu:8 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 8 2 0.00001 5 Fixed Y Y &> ~/logs/train_lfb.00001.Fixed.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
