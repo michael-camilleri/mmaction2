@@ -147,7 +147,7 @@ echo ""
 # ===========
 echo " ===================================="
 echo " Copying Model Weights to ${OUT_NAME}"
-mkdir -p "${HOME}/models/LFB/Trained/${OUT_NAME}"
+mkdir -p "${HOME}/models/LFB/Trained/"
 rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
 echo " Copying also LFB Features"
 rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
