@@ -26,7 +26,7 @@
 
 # Do some Calculations/Preprocessing
 BATCH_SIZE=$(echo "${1} * ${2}" | bc)
-OUT_NAME=${4}_${BATCH_SIZE}_${5^}_${3}_S
+OUT_NAME=${4}_${BATCH_SIZE}_${3}_S
 
 # ===================
 # Environment setup
@@ -99,7 +99,7 @@ echo ""
 echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ] && ["${7,,}" = "n" ]; then
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ] && [ "${7,,}" = "n" ]; then
   echo "    Training FB Exists and not Forced to regenerate: skipping."
 else
   echo "    Re-Generating"
@@ -111,7 +111,7 @@ else
 fi
 echo " ------------------------------"
 echo "  -> Validation Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && ["${7,,}" = "n" ]; then
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && [ "${7,,}" = "n" ]; then
   echo "    Validation FB Exists and not Forced to regenerate: skipping."
 else
   echo "    Re-Generating"
@@ -133,11 +133,11 @@ echo ""
 # Train Model
 # ===========
 echo " ===================================="
-echo " Training Model with ${1} GPU(s)  (BS=${BATCH_SIZE}, LR=${3}) for ${3} epochs"
+echo " Training Model with ${1} GPU(s)  (BS=${BATCH_SIZE}, LR=${3}) for ${4} epochs"
 python -m torch.distributed.launch --nproc_per_node=${1} tools/train.py \
     ${SCRATCH_MODELS}/train.py --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu=${2} total_epochs=${3} optimizer.lr=${3}
+    --cfg-options data.videos_per_gpu=${2} optimizer.lr=${3} total_epochs=${4}
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
