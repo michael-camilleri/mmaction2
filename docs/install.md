@@ -21,11 +21,11 @@ We provide some tips for MMAction2 installation in this file.
  To install on SLURM nodes, follow the steps below:
   1. Start an interactive session on a GPU node - this ensures that pytorch picks up the GPU
   2. Create environment: use python=3.7
-  3. Set `CUDA_HOME='/opt/cuda-10.2.89_440_33` (just in case)
+  3. Set `export CUDA_HOME='/opt/cuda-10.2.89_440_33'` (just in case)
   4. Set Environment Activation Scripts to initialise GCC to v5.5
-  5. Install Pytorch 1.5 through CUDA (note the version is important):
+  5. Install Pytorch 1.8 through CUDA (note the version is important):
       ```bash
-      conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=10.2 -c pytorch
+      conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch
       ```
   6. Install MMCV (from source, from within downloaded repository):
       ```bash
