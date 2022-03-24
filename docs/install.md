@@ -5,6 +5,7 @@ We provide some tips for MMAction2 installation in this file.
 <!-- TOC -->
 
 - [Installation](#installation)
+  - [MC Update](#mc-update)
   - [Requirements](#requirements)
   - [Prepare environment](#prepare-environment)
   - [Install MMAction2](#install-mmaction2)
@@ -15,6 +16,32 @@ We provide some tips for MMAction2 installation in this file.
   - [Verification](#verification)
 
 <!-- TOC -->
+
+## MC Update
+ To install on SLURM nodes, follow the steps below:
+  1. Start an interactive session on a GPU node - this ensures that pytorch picks up the GPU
+  2. Create environment: use python=3.7
+  3. Set `CUDA_HOME='/opt/cuda-10.2.89_440_33` (just in case)
+  4. Set Environment Activation Scripts to initialise GCC to v5.5
+  5. Install Pytorch 1.9 through CUDA (note the version is important):
+      ```bash
+      conda install pytorch==1.9.0 torchvision==0.10.0 torchaudio==0.9.0 cudatoolkit=10.2 -c pytorch
+      ```
+  6. Install MMCV (from source, from within downloaded repository):
+      ```bash
+      pip install -r requirements/optional.txt
+      MMCV_WITH_OPS=1 pip install -e .
+      ```
+  7. Install MMDet (from source, from within downloaded repository) --- Make sure version is compatible with MMCV:
+      ```bash
+      pip install -r requirements/build.txt
+      pip install -v -e .
+      ```
+  8. Install MMAction (from within downloaded repository):
+      ```bash
+      pip install -r requirements/build.txt
+      pip install -v -e .
+      ```
 
 ## Requirements
 
