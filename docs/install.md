@@ -42,6 +42,10 @@ We provide some tips for MMAction2 installation in this file.
       pip install -r requirements/build.txt
       pip install -v -e .
       ```
+  9. Install HIPCC:
+      ```bash
+      conda install -c conda-forge hip
+      ```
 
 ## Requirements
 
