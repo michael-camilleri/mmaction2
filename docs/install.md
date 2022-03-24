@@ -21,30 +21,30 @@ We provide some tips for MMAction2 installation in this file.
  To install on SLURM nodes, follow the steps below:
   1. Start an interactive session on a GPU node - this ensures that pytorch picks up the GPU
   2. Create environment: use python=3.7
-  3. Set `export CUDA_HOME='/opt/cuda-10.2.89_440_33'` (just in case)
-  4. Set Environment Activation Scripts to initialise GCC to v5.5
-  5. Install Pytorch 1.8 through CUDA (note the version is important):
+  3. Set Environment Activation Scripts to initialise GCC to v5.5
+  4. Set `export CUDA_HOME='/opt/cuda-10.2.89_440_33'` (just in case)
+  5. Install HIPCC:
       ```bash
-      conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch
+      conda install -c conda-forge hip
       ```
-  6. Install MMCV (from source, from within downloaded repository):
+  6. Install Pytorch 1.5 through CUDA (note the version is important):
+      ```bash
+      conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=10.2 -c pytorch
+      ```
+  7. Install MMCV (from source, from within downloaded repository):
       ```bash
       pip install -r requirements/optional.txt
       MMCV_WITH_OPS=1 pip install -e .
       ```
-  7. Install MMDet (from source, from within downloaded repository) --- Make sure version is compatible with MMCV:
+  8. Install MMDet (from source, from within downloaded repository) --- Make sure version is compatible with MMCV:
       ```bash
       pip install -r requirements/build.txt
       pip install -v -e .
       ```
-  8. Install MMAction (from within downloaded repository):
+  9. Install MMAction (from within downloaded repository):
       ```bash
       pip install -r requirements/build.txt
       pip install -v -e .
-      ```
-  9. Install HIPCC:
-      ```bash
-      conda install -c conda-forge hip
       ```
 
 ## Requirements
