@@ -29,21 +29,30 @@ We provide some tips for MMAction2 installation in this file.
       ```
   6. Install Pytorch 1.5 through CUDA (note the version is important):
       ```bash
-      conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=10.2 -c pytorch
+      pip install torch==1.5.1 torchvision==0.6.1
       ```
   7. Install MMCV (from source, from within downloaded repository):
       ```bash
       pip install -r requirements/optional.txt
+      pip install -r requirements/build.txt
+      pip install -r requirements/runtime.txt
       MMCV_WITH_OPS=1 pip install -e .
       ```
   8. Install MMDet (from source, from within downloaded repository) --- Make sure version is compatible with MMCV:
       ```bash
       pip install -r requirements/build.txt
+      pip install -r requirements/optional.txt
+      pip install -r requirements/runtime.txt
       pip install -v -e .
       ```
-  9. Install MMAction (from within downloaded repository):
+  9. Install FFMPeg
+     ```bash
+     conda install ffmpeg
+     ```
+  10. Install MMAction (from within downloaded repository):
       ```bash
       pip install -r requirements/build.txt
+      pip install -r requirements/optional.txt
       pip install -v -e .
       ```
 
