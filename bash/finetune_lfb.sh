@@ -146,12 +146,13 @@ echo ""
 # Copy Data
 # ===========
 echo " ===================================="
-echo " Copying Model Weights to ${OUT_NAME}"
-mkdir -p "${HOME}/models/LFB/Trained/"
-rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+OUTPUT_DIR="${HOME}/models/LFB/Trained/${5}"
+mkdir -p ${OUTPUT_DIR}
+echo " Copying Model Weights to ${OUTPUT_DIR}/${OUT_NAME}"
+rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${OUTPUT_DIR}/${OUT_NAME}"
 echo " Copying also LFB Features"
-rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${HOME}/models/LFB/Trained/${OUT_NAME}"
+rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}/${OUT_NAME}"
 rm -rf ${SCRATCH_MODELS}/out
 echo "   ++ ALL DONE! Hurray! ++"
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${HOME}/models/LFB/Trained/${OUT_NAME}'."
+mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}/${OUT_NAME}'."
 conda deactivate
