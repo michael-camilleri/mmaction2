@@ -92,15 +92,18 @@ echo ""
 
 # ======================
 # Generate Feature Banks
-#   Note that this is smart to not regenerate if the FB exists
 # ======================
 echo " ===================================="
-echo " Generating Feature-Bank Vectors for ${2}"
-python tools/test.py \
-    ${SCRATCH_MODELS}/feature_bank.eval.py \
-    ${SCRATCH_MODELS}/feature_bank.base.pth \
-    --out ${SCRATCH_DATA}/feature_bank/eval.csv
-echo "    == ${2} FB Done =="
+if [ -f "${SCRATCH_DATA}/feature_bank/lfb_${2}.pkl" ] && [ "${4,,}" = "n" ]; then
+  echo "    ${2} FB Exists and not Forced to regenerate: skipping."
+else
+  echo "    Re-Generating"
+  python tools/test.py \
+      ${SCRATCH_MODELS}/feature_bank.eval.py \
+      ${SCRATCH_MODELS}/feature_bank.base.pth \
+      --out ${SCRATCH_DATA}/feature_bank/eval.csv
+  echo "    == ${2} FB Done =="
+fi
 echo " ------------------------------"
 echo "  -> Cleaning up"
 rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
