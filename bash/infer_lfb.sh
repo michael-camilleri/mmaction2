@@ -126,7 +126,7 @@ echo " ===================================="
 echo " Inferring Behaviours for ${DATASET} using model ${MODEL_PATH}"
 mkdir -p "${SCRATCH_OUT}"
 python tools/test.py \
-    ${SCRATCH_HOME}/models/lfb/infer.py \
+    ${SCRATCH_MODELS}/infer.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
     --out ${SCRATCH_OUT}/${DATASET}.csv
 echo "   == Inference Done =="
