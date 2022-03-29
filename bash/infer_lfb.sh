@@ -13,7 +13,7 @@
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles01 bash/infer_lfb.sh Fixed/50_16_0.000001_S/epoch_39.pth Validate Y Y &> ~/logs/infer_lfb.000001.out
+#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/50_16_0.000001_S/epoch_39.pth Validate Fixed Y Y &> ~/logs/infer_lfb.000001.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -110,8 +110,7 @@ else
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.eval.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/eval.csv \
-      --cfg-options data.videos_per_gpu=8
+      --out ${SCRATCH_DATA}/feature_bank/eval.csv
   echo "    == ${DATASET} FB Done =="
 fi
 echo " ------------------------------"
@@ -131,8 +130,7 @@ mkdir -p "${SCRATCH_DATA}/out"
 python tools/test.py \
     ${SCRATCH_HOME}/models/lfb/infer.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_DATA}/out/${DATASET}.csv \
-    --cfg-options data.videos_per_gpu=8
+    --out ${SCRATCH_DATA}/out/${DATASET}.csv
 echo "   == Inference Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""
