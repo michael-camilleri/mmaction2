@@ -110,7 +110,8 @@ else
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.eval.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/eval.csv
+      --out ${SCRATCH_DATA}/feature_bank/eval.csv \
+      --cfg-options data.videos_per_gpu=8
   echo "    == ${DATASET} FB Done =="
 fi
 echo " ------------------------------"
@@ -130,7 +131,8 @@ mkdir -p "${SCRATCH_DATA}/out"
 python tools/test.py \
     ${SCRATCH_HOME}/models/lfb/infer.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_DATA}/out/${DATASET}.csv
+    --out ${SCRATCH_DATA}/out/${DATASET}.csv \
+    --cfg-options data.videos_per_gpu=8
 echo "   == Inference Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""

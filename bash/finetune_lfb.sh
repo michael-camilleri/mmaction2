@@ -106,7 +106,8 @@ else
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.train.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/train.csv
+      --out ${SCRATCH_DATA}/feature_bank/train.csv \
+      --cfg-options data.videos_per_gpu=8
   echo "     Training FB Done"
 fi
 echo " ------------------------------"
