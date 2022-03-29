@@ -116,8 +116,8 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && [ "${7,,}" = "n" ];
 else
   echo "    Re-Generating"
   python tools/test.py \
-      ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py \
-      ${SCRATCH_HOME}/models/lfb/feature_bank.base.pth \
+      ${SCRATCH_MODELS}/feature_bank.valid.py \
+      ${SCRATCH_MODELS}/feature_bank.base.pth \
       --out ${SCRATCH_DATA}/feature_bank/validate.csv
   echo "     Validation FB Done"
 fi
