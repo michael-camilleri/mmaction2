@@ -56,7 +56,7 @@ echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
 echo "     .. Annotations .."
 rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 ${HOME}/data/behaviour/Train/$5/ ${SCRATCH_DATA}
+      --info=progress2 ${HOME}/data/behaviour/Train/${5}/ ${SCRATCH_DATA}
 if [ "${6,,}" = "y" ]; then
   echo "     .. Frames .."
   rsync --archive --update --info=progress2 ${HOME}/data/behaviour/Train/Frames ${SCRATCH_DATA}
