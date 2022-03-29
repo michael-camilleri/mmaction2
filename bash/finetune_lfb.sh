@@ -65,7 +65,7 @@ else
 fi
 echo " ------------------------------"
 echo "  -> Synchronising Models"
-SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_train
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
@@ -80,7 +80,7 @@ sed -i "s@<DATASET>@Train@" ${SCRATCH_HOME}/models/lfb/feature_bank.train.py
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
-sed -i "s@<DATASET>@Validate@" ${SCRATCH_HOME}/models/lfb/feature_bank.valid.py
+sed -i "s@<DATASET>@Validate@" ${SCRATCH_MODELS}/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py

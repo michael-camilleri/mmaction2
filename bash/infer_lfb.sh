@@ -75,7 +75,8 @@ else
 fi
 echo " ------------------------------"
 echo "  -> Synchronising Models"
-SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_infer
+SCRATCH_OUT=${SCRATCH_DATA}/out_infer
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 # Copy the FB Inference Model and the Training Model (separately)
@@ -87,14 +88,13 @@ cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
-sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_HOME}/models/lfb/feature_bank.eval.py
+sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/code/MMAction/configs/own/infer.base.py ${SCRATCH_MODELS}/infer.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.py
-sed -i "s@<RESULTS>@${SCRATCH_DATA}/out@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/infer.py
-mkdir -p ${SCRATCH_DATA}/out
 echo "    == Models Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
@@ -106,18 +106,16 @@ echo " ===================================="
 if [ -f "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" ] && [ "${FORCE_LFB}" = "n" ]; then
   echo "    ${DATASET} FB Exists and not Forced to regenerate: skipping."
 else
-  echo "    Re-Generating"
+  echo "    -> Re-Generating"
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.eval.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
       --out ${SCRATCH_DATA}/feature_bank/eval.csv
+  echo "    -> Cleaning up"
+  rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
+  rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
   echo "    == ${DATASET} FB Done =="
 fi
-echo " ------------------------------"
-echo "  -> Cleaning up"
-rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
-rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
-echo "  == FB Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${1}" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
 echo ""
 
@@ -126,11 +124,11 @@ echo ""
 # ================
 echo " ===================================="
 echo " Inferring Behaviours for ${DATASET} using model ${MODEL_PATH}"
-mkdir -p "${SCRATCH_DATA}/out"
+mkdir -p "${SCRATCH_OUT}"
 python tools/test.py \
     ${SCRATCH_HOME}/models/lfb/infer.py \
     ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_DATA}/out/${DATASET}.csv
+    --out ${SCRATCH_OUT}/${DATASET}.csv
 echo "   == Inference Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""
@@ -142,11 +140,11 @@ echo " ===================================="
 RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
 echo " Copying Results to ${RESULT_PATH}"
 mkdir -p ${RESULT_PATH}
-rsync --archive --compress "${SCRATCH_DATA}/out/" ${RESULT_PATH}/
+rsync --archive --compress "${SCRATCH_OUT}/" ${RESULT_PATH}/
 echo " Copying also LFB Features and Config File for posterity"
 rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" ${RESULT_PATH}/
-cp ${SCRATCH_HOME}/models/lfb/infer.py ${RESULT_PATH}/infer.py
-rm -rf ${SCRATCH_DATA}/out
+cp ${SCRATCH_MODELS}/infer.py ${RESULT_PATH}/infer.py
+rm -rf ${SCRATCH_OUT}
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Outputs copied to '${HOME}/results/LFB/${CONFIG_NAME}'."
 conda deactivate

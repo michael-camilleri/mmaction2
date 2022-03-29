@@ -38,6 +38,7 @@ lfb_channels = 2048
 ################## STANDARD VALUES ##################
 
 # Model Head Override
+#  Note that at Test Time, we are always multi-label to output all probabilities.
 model = dict(
     roi_head=dict(
         shared_head=dict(
