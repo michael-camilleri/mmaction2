@@ -252,6 +252,7 @@ class BBoxHeadAVA(nn.Module):
 
         return losses
 
+    # The below has changed to only output the scores for the classes of interest
     def get_det_bboxes(self,
                        rois,
                        cls_score,
@@ -267,9 +268,9 @@ class BBoxHeadAVA(nn.Module):
         # Handle Multi/Single Label
         if cls_score is not None:
             if self.multilabel:
-                scores = cls_score.sigmoid()
+                scores = cls_score[:, 1:].sigmoid()
             else:
-                scores = cls_score.softmax(dim=-1)
+                scores = cls_score[:, 1:].softmax(dim=-1)
         else:
             scores = None
 
