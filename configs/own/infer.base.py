@@ -66,7 +66,7 @@ model = dict(
                 multilabel=False, # Enforce single-label
         )
     ),
-    test_cfg=dict(rcnn=dict(action_thr=-1.0)) # Changed from 0.002 for single-label
+    test_cfg=dict(rcnn=dict(action_thr=0.0)) # Changed to 0 to give out all values.
 )
 
 
