@@ -143,8 +143,9 @@ RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
 echo " Copying Results to ${RESULT_PATH}"
 mkdir -p ${RESULT_PATH}
 rsync --archive --compress "${SCRATCH_DATA}/out/" ${RESULT_PATH}/
-echo " Copying also LFB Features for posterity"
+echo " Copying also LFB Features and Config File for posterity"
 rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" ${RESULT_PATH}/
+cp ${SCRATCH_HOME}/models/lfb/infer.py ${RESULT_PATH}/infer.py
 rm -rf ${SCRATCH_DATA}/out
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Outputs copied to '${HOME}/results/LFB/${CONFIG_NAME}'."
