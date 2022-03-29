@@ -268,9 +268,9 @@ class BBoxHeadAVA(nn.Module):
         # Handle Multi/Single Label
         if cls_score is not None:
             if self.multilabel:
-                scores = cls_score[:, 1:].sigmoid()
+                scores = cls_score.sigmoid()
             else:
-                scores = cls_score[:, 1:].softmax(dim=-1)
+                scores = cls_score.softmax(dim=-1)
         else:
             scores = None
 
