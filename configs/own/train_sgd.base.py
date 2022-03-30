@@ -163,7 +163,7 @@ lr_config = dict(
     step=[20, 40],  # Previously [10, 15]
     warmup='linear',
     warmup_by_epoch=True,
-    warmup_iters=5,
+    warmup_iters=10,
     warmup_ratio=0.1)
 total_epochs = 5
 checkpoint_config = dict(interval=5)

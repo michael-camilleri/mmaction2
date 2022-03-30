@@ -26,7 +26,7 @@
 
 # Do some Calculations/Preprocessing
 BATCH_SIZE=$(echo "${1} * ${2}" | bc)
-OUT_NAME=${4}_${BATCH_SIZE}_${3}_S
+OUT_NAME=${4}_${BATCH_SIZE}_${3}_S10
 
 # ===================
 # Environment setup
