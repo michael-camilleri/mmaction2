@@ -83,8 +83,9 @@ model = dict(
 train_pipeline = [
     dict(type='SampleAVAFrames', clip_len=4, frame_interval=16),
     dict(type='RawFrameDecode'),
-    dict(type='RandomRescale', scale_range=(256, 320)),
-    dict(type='RandomCrop', size=256),
+    # dict(type='RandomRescale', scale_range=(256, 320)),
+    # dict(type='RandomCrop', size=256),
+    dict(type='Resize', scale=(-1, 256)),  # Added this instead: no augmentation
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
     dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet dets

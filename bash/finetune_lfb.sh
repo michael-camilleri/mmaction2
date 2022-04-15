@@ -38,7 +38,7 @@ FORCE_LFB=${8,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
-OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}
+OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_NA
 
 # Path Values
 SCRATCH_HOME=/disk/scratch/${USER}
