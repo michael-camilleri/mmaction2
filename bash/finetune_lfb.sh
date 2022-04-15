@@ -17,7 +17,7 @@
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:8 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 8 2 0.00001 5 Fixed Y Y &> ~/logs/train_lfb.00001.Fixed.out
+#     srun --time=1-23:00:00 --gres=gpu:8 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 8 2 0.00001 50 10 Fixed Y Y &> ~/logs/train_lfb.00001.Fixed.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -38,7 +38,7 @@ FORCE_LFB=${8,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
-OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_NA
+OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_CJ
 
 # Path Values
 SCRATCH_HOME=/disk/scratch/${USER}

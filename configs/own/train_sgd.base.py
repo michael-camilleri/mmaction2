@@ -86,6 +86,7 @@ train_pipeline = [
     # dict(type='RandomRescale', scale_range=(256, 320)),
     # dict(type='RandomCrop', size=256),
     dict(type='Resize', scale=(-1, 256)),  # Added this instead: no augmentation
+    dict(type='ColorJitter', brightness=0.25, contrast=0.25, saturation=0, hue=0),
     dict(type='Normalize', **ImageNormalisation),
     dict(type='FormatShape', input_format='NCTHW', collapse=True),
     dict(type='Rename', mapping=dict(imgs='img')), # Rename is needed to use mmdet dets
