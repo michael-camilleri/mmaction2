@@ -78,11 +78,24 @@ MMAction2 是一款基于 PyTorch 的视频理解开源工具箱，是 [OpenMMLa
 - (2021-10-25) 提供使用自定义数据集训练 PoseC3D 的 [教程](https://github.com/open-mmlab/mmaction2/blob/master/configs/skeleton/posec3d/custom_dataset_training.md)，此 PR 由用户 [bit-scientist](https://github.com/bit-scientist) 完成！
 - (2021-10-16) 在 UCF101, HMDB51 上支持 **PoseC3D**，仅用 2D 关键点就可分别达到 87.0% 和 69.3% 的识别准确率。两数据集的预提取骨架特征可以公开下载。
 
-v0.22.0 版本已于 2022 年 3 月 5 日发布，可通过查阅 [更新日志](/docs/changelog.md) 了解更多细节以及发布历史
+v0.23.0 版本已于 2022 年 4 月 1 日发布，可通过查阅 [更新日志](/docs/changelog.md) 了解更多细节以及发布历史
 
 ## 安装
 
-请参考 [安装指南](/docs_zh_CN/install.md) 进行安装
+MMAction2 依赖 [PyTorch](https://pytorch.org/), [MMCV](https://github.com/open-mmlab/mmcv), [MMDetection](https://github.com/open-mmlab/mmdetection)(可选), [MMPose](https://github.com/open-mmlab/mmpose)(可选)，以下是安装的简要步骤。
+更详细的安装指南请参考 [install.md](docs_zh_CN/install.md)。
+
+```shell
+conda create -n open-mmlab python=3.8 pytorch=1.10 cudatoolkit=11.3 torchvision -c pytorch -y
+conda activate open-mmlab
+pip3 install openmim
+mim install mmcv-full
+mim install mmdet  # 可选
+mim install mmpose  # 可选
+git clone https://github.com/open-mmlab/mmaction2.git
+cd mmaction2
+pip3 install -e .
+```
 
 ## 教程
 
