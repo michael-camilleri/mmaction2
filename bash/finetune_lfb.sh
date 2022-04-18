@@ -45,7 +45,7 @@ SCRATCH_HOME=/disk/scratch/${USER}
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_train
 SCRATCH_OUT=${SCRATCH_HOME}/results_train
-OUTPUT_DIR="${HOME}/models/LFB/Trained/${PATH_OFFSET}"
+OUTPUT_DIR="${HOME}/models/LFB/Trained/${PATH_OFFSET}/${OUT_NAME}"
 
 # ===================
 # Environment setup
@@ -59,7 +59,7 @@ echo "Libraries from: ${LD_LIBRARY_PATH}"
 export NCCL_DEBUG=INFO
 
 # Make your own folder on the node's scratch disk
-mkdir -p ${SCRATCH_HOME}
+mkdir -p "${SCRATCH_HOME}"
 echo ""
 
 # ================================
@@ -67,16 +67,16 @@ echo ""
 # ================================
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
-mkdir -p ${SCRATCH_DATA}
+mkdir -p "${SCRATCH_DATA}"
 echo "  -> Synchronising Data"
 echo "     .. Schemas .."
-cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
+cp ${HOME}/data/behaviour/Common/AVA* "${SCRATCH_DATA}/"
 echo "     .. Annotations .."
 rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 ${HOME}/data/behaviour/Train/${PATH_OFFSET}/ ${SCRATCH_DATA}/
+      --info=progress2 "${HOME}/data/behaviour/Train/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  rsync --archive --update --info=progress2 ${HOME}/data/behaviour/Train/Frames ${SCRATCH_DATA}/
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Train/Frames" "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
@@ -132,9 +132,9 @@ if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && [ "${FORCE_LFB}" = 
 else
   echo "    Re-Generating"
   python tools/test.py \
-      ${SCRATCH_MODELS}/feature_bank.valid.py \
-      ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/validate.csv
+      "${SCRATCH_MODELS}/feature_bank.valid.py" \
+      "${SCRATCH_MODELS}/feature_bank.base.pth" \
+      --out "${SCRATCH_DATA}/feature_bank/validate.csv"
   echo "     Validation FB Done"
 fi
 echo " ------------------------------"
@@ -150,10 +150,10 @@ echo ""
 # ===========
 echo " ===================================="
 echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${MAX_EPOCHS} epochs"
-python -m torch.distributed.launch --nproc_per_node=${GPU_NODES} tools/train.py \
-    ${SCRATCH_MODELS}/train.py --launcher pytorch \
+python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" tools/train.py \
+    "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu=${IMAGE_GPU} optimizer.lr=${LEARN_RATE} total_epochs=${MAX_EPOCHS} lr_config.warmup_iters=${WARMUP_ITER}
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" lr_config.warmup_iters="${WARMUP_ITER}"
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
@@ -163,11 +163,11 @@ echo ""
 # ===========
 echo " ===================================="
 mkdir -p ${OUTPUT_DIR}
-echo " Copying Model Weights to ${OUTPUT_DIR}/${OUT_NAME}"
-rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${OUTPUT_DIR}/${OUT_NAME}"
+echo " Copying Model Weights to ${OUTPUT_DIR}"
+rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${OUTPUT_DIR}"
 echo " Copying also LFB Features"
-rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}/${OUT_NAME}"
-rm -rf ${SCRATCH_MODELS}/out
+rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}"
+rm -rf "${SCRATCH_MODELS}/out"
 echo "   ++ ALL DONE! Hurray! ++"
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}/${OUT_NAME}'."
+mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}'."
 conda deactivate
