@@ -38,7 +38,7 @@ FORCE_LFB=${8,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
-OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_CJ
+OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_ACJ
 
 # Path Values
 SCRATCH_HOME=/disk/scratch/${USER}
@@ -164,10 +164,10 @@ echo ""
 echo " ===================================="
 mkdir -p ${OUTPUT_DIR}
 echo " Copying Model Weights to ${OUTPUT_DIR}"
-rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/out/" "${OUTPUT_DIR}"
+rsync --archive --compress --info=progress2 "${SCRATCH_OUT}" "${OUTPUT_DIR}"
 echo " Copying also LFB Features"
 rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}"
-rm -rf "${SCRATCH_MODELS}/out"
+rm -rf "${SCRATCH_OUT}"
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}'."
 conda deactivate
