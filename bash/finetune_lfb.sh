@@ -12,12 +12,13 @@
 #     [Epochs]   - Maximum Number of Epochs to train for
 #     [Warmup]   - Warmup Period (epochs)
 #     [Offset]   - Offset from base data location to retrieve the data splits
+#     [Frame_Off]- Frame Directory to use
 #     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
 #                       known that the machine contains the right data splits.
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=1-23:00:00 --gres=gpu:8 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 8 2 0.00001 50 10 Fixed Y Y &> ~/logs/train_lfb.00001.Fixed.out
+#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 4 4 0.00001 50 10 Fixed Frames_DCE N Y &> ~/logs/train_lfb.00001_DCE.Fixed.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -33,8 +34,9 @@ LEARN_RATE=${3}
 MAX_EPOCHS=${4}
 WARMUP_ITER=${5}
 PATH_OFFSET=${6}
-FORCE_FRAMES=${7,,}
-FORCE_LFB=${8,,}
+FRAMES_DIR=${7}
+FORCE_FRAMES=${8,,}
+FORCE_LFB=${9,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
@@ -76,7 +78,9 @@ rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*
       --info=progress2 "${HOME}/data/behaviour/Train/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Train/Frames" "${SCRATCH_DATA}/"
+  mkdir -p "${SCRATCH_DATA}/${FRAMES_DIR}"
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Train/${FRAMES_DIR}" \
+        "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
@@ -93,17 +97,20 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<DATASET>@Train@" ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<FRAMES>@${FRAMES_DIR}" ${SCRATCH_MODELS}/feature_bank.train.py
 #  Update V-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<FRAMES>@${FRAMES_DIR}" ${SCRATCH_MODELS}/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELOUT>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<FRAMES>@${FRAMES_DIR}" ${SCRATCH_MODELS}/train.py
 echo "    == Models Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
@@ -164,7 +171,7 @@ echo ""
 echo " ===================================="
 mkdir -p ${OUTPUT_DIR}
 echo " Copying Model Weights to ${OUTPUT_DIR}"
-rsync --archive --compress --info=progress2 "${SCRATCH_OUT}" "${OUTPUT_DIR}"
+rsync --archive --compress --info=progress2 "${SCRATCH_OUT}/" "${OUTPUT_DIR}"
 echo " Copying also LFB Features"
 rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}"
 rm -rf "${SCRATCH_OUT}"

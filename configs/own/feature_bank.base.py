@@ -23,7 +23,7 @@ _base_ = ['backbone.base.py']
 # Paths Config
 Source_Root='<SOURCE>'
 Output_Path='<OUTPUT>'
-Frames_Offset = 'Frames'
+Frames_Offset = '<FRAMES>'
 Annotation_File = 'AVA.Behaviours.csv'
 Label_File = 'AVA.Actions.pbtxt'
 Detections_File = 'AVA.Detections.pkl'
