@@ -32,10 +32,11 @@ Detections_File = 'AVA.Detections.pkl'
 DataSet='<DATASET>' # You need to specify [Train|Validate|Test]
 HalfPrecision = True # [True|False]
 ImageNormalisation = dict(
-    mean=[69.201, 69.201, 69.201],
-    std=[58.571, 58.571, 58.571],
+    mean=[69.201, 69.201, 69.201], # [149.980, 132.519, 131.807], #
+    std=[58.571, 58.571, 58.571], # [52.788, 52.150, 52.295], #
     to_bgr=False
 ) # Formerly mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
+#  Note that the non-equal ones are for DCE Frames
 
 
 ################## STANDARD VALUES ##################
