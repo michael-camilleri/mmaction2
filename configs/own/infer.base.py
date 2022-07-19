@@ -96,6 +96,7 @@ data = dict(
         type='AVADataset',
         num_classes=9,
         fps=25,
+        start_index=0,
         timestamp_start=0,
         timestamp_end=119,
         ann_file=f'{Source_Root}/{DataSet}/{Annotation_File}',

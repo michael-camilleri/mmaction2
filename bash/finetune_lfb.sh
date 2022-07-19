@@ -13,6 +13,7 @@
 #     [Warmup]   - Warmup Period (epochs)
 #     [Offset]   - Offset from base data location to retrieve the data splits
 #     [Frame_Off]- Frame Directory to use
+#     [Frame Num]- Starting Index for Frame Numbering
 #     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
 #                       known that the machine contains the right data splits.
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
@@ -35,8 +36,9 @@ MAX_EPOCHS=${4}
 WARMUP_ITER=${5}
 PATH_OFFSET=${6}
 FRAMES_DIR=${7}
-FORCE_FRAMES=${8,,}
-FORCE_LFB=${9,,}
+FRAME_NUM=${8}
+FORCE_FRAMES=${9,,}
+FORCE_LFB=${10,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
@@ -129,7 +131,8 @@ else
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.train.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/train.csv
+      --out ${SCRATCH_DATA}/feature_bank/train.csv \
+      --cfg-options data.test.start_index="${FRAME_NUM}"
   echo "     Training FB Done"
 fi
 echo " ------------------------------"
@@ -141,7 +144,8 @@ else
   python tools/test.py \
       "${SCRATCH_MODELS}/feature_bank.valid.py" \
       "${SCRATCH_MODELS}/feature_bank.base.pth" \
-      --out "${SCRATCH_DATA}/feature_bank/validate.csv"
+      --out "${SCRATCH_DATA}/feature_bank/validate.csv" \
+      --cfg-options data.test.start_index="${FRAME_NUM}"
   echo "     Validation FB Done"
 fi
 echo " ------------------------------"
@@ -160,7 +164,7 @@ echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RA
 python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" tools/train.py \
     "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" lr_config.warmup_iters="${WARMUP_ITER}"
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" lr_config.warmup_iters="${WARMUP_ITER}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}"
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
