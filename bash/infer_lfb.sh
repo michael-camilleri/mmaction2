@@ -10,6 +10,7 @@
 #     [Offset]   - Offset from base data location to retrieve the data splits
 #     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time
 #                       if it is known that the machine contains the right data splits.
+#     [Frame Num]- Starting Index for Frame Numbering
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
@@ -28,7 +29,9 @@ MODEL_PATH=${1}
 DATASET=${2}
 OFFSET=${3}
 COPY_FRAMES=${4,,}
-FORCE_LFB=${5,,}
+FRAME_NUM=${5}
+FORCE_LFB=${6,,}
+
 # Derivative Values
 CONFIG_PATH=$(dirname "${MODEL_PATH}")
 CONFIG_NAME=$(basename "${CONFIG_PATH}")
@@ -110,7 +113,8 @@ else
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.eval.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/eval.csv
+      --out ${SCRATCH_DATA}/feature_bank/eval.csv \
+      --cfg-options data.test.start_index="${FRAME_NUM}"
   echo "    -> Cleaning up"
   rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
   rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
@@ -126,9 +130,10 @@ echo " ===================================="
 echo " Inferring Behaviours for ${DATASET} using model ${MODEL_PATH}"
 mkdir -p "${SCRATCH_OUT}"
 python tools/test.py \
-    ${SCRATCH_MODELS}/infer.py \
-    ${SCRATCH_MODELS}/inference.trained.pth \
-    --out ${SCRATCH_OUT}/${DATASET}.csv
+    "${SCRATCH_MODELS}"/infer.py \
+    "${SCRATCH_MODELS}"/inference.trained.pth \
+    --out "${SCRATCH_OUT}/${DATASET}.csv" \
+    --cfg-options data.test.start_index="${FRAME_NUM}"
 echo "   == Inference Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Behaviour Inference Completed."
 echo ""
@@ -139,12 +144,12 @@ echo ""
 echo " ===================================="
 RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
 echo " Copying Results to ${RESULT_PATH}"
-mkdir -p ${RESULT_PATH}
-rsync --archive --compress "${SCRATCH_OUT}/" ${RESULT_PATH}/
+mkdir -p "${RESULT_PATH}"
+rsync --archive --compress "${SCRATCH_OUT}/" "${RESULT_PATH}/"
 echo " Copying also LFB Features and Config File for posterity"
-rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" ${RESULT_PATH}/
-cp ${SCRATCH_MODELS}/infer.py ${RESULT_PATH}/infer.py
-rm -rf ${SCRATCH_OUT}
+rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" "${RESULT_PATH}/"
+cp "${SCRATCH_MODELS}/infer.py" "${RESULT_PATH}/infer.py"
+rm -rf "${SCRATCH_OUT}"
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Outputs copied to '${HOME}/results/LFB/${CONFIG_NAME}'."
 conda deactivate
