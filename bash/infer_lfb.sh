@@ -57,8 +57,8 @@ export NCCL_DEBUG=INFO
 # Make your own folder on the node's scratch disk
 SCRATCH_HOME=/disk/scratch/${USER}
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
-SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_infer
-SCRATCH_OUT=${SCRATCH_DATA}/out_infer
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_infer_${DATASET}
+SCRATCH_OUT=${SCRATCH_DATA}/out_infer_${DATASET}
 RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
 
 # Create Folder
