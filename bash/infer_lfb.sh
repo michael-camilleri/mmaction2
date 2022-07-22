@@ -5,16 +5,17 @@
 #     Runs inference on the Test-Set
 #
 #  Script takes the following parameter
-#     [Model]    - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
-#     [Which]    - Which DataSet to evaluate (Train/Validate/Predict/Test)
-#     [Offset]   - Offset from base data location to retrieve the data splits
-#     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time
+#     [MODEL_PATH]    - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
+#     [DATASET]       - Which DataSet to evaluate (Train/Validate/Predict/Test)
+#     [DATA_OFFSET]   - Offset from base data location to retrieve the data splits
+#     [FRAME_OFFSET]  - Offset from base data location to retrieve Images
+#     [FRAME_NUM]     - Starting Index for Frame Numbering
+#     [COPY_FRAMES]   - Y/N: Indicates if Frames should be rsynced: this is done to save time
 #                       if it is known that the machine contains the right data splits.
-#     [Frame Num]- Starting Index for Frame Numbering
-#     [Features] - Y/N: If Y, force regenerate feature-banks.
+#     [FORCE_LFB]     - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/50_16_0.000001_S/epoch_39.pth Validate Fixed Y Y &> ~/logs/infer_lfb.000001.out
+#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/SOTA/trained.pth Validate Fixed Frames_Raw_Ext 125 Y Y &> ~/logs/infer_lfb.000001.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -27,10 +28,11 @@
 # Get and store the main Parameters
 MODEL_PATH=${1}
 DATASET=${2}
-OFFSET=${3}
-COPY_FRAMES=${4,,}
+DATA_OFFSET=${3}
+FRAME_OFFSET=${4}
 FRAME_NUM=${5}
-FORCE_LFB=${6,,}
+COPY_FRAMES=${6,,}
+FORCE_LFB=${7,,}
 
 # Derivative Values
 CONFIG_PATH=$(dirname "${MODEL_PATH}")
@@ -54,6 +56,12 @@ export NCCL_DEBUG=INFO
 
 # Make your own folder on the node's scratch disk
 SCRATCH_HOME=/disk/scratch/${USER}
+SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_infer
+SCRATCH_OUT=${SCRATCH_DATA}/out_infer
+RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
+
+# Create Folder
 mkdir -p ${SCRATCH_HOME}
 echo ""
 
@@ -63,27 +71,25 @@ echo ""
 echo " ===================================="
 echo "Consolidating Data/Models in ${SCRATCH_HOME}"
 echo "  -> Synchronising Data"
-SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
 mkdir -p ${SCRATCH_DATA}
 echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
 echo "     .. Annotations .."
 rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 ${HOME}/data/behaviour/${PARENT_DIR}/${OFFSET}/${DATASET} ${SCRATCH_DATA}
+      --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${DATA_OFFSET}/${DATASET}" "${SCRATCH_DATA}/"
 if [ "${COPY_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  rsync --archive --update --info=progress2 ${HOME}/data/behaviour/${PARENT_DIR}/Frames ${SCRATCH_DATA}
+  mkdir -p "${SCRATCH_DATA}/${FRAME_OFFSET}"
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${FRAME_OFFSET}" "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
 echo " ------------------------------"
 echo "  -> Synchronising Models"
-SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_infer
-SCRATCH_OUT=${SCRATCH_DATA}/out_infer
 echo "   .. Copying Models .. "
-mkdir -p ${SCRATCH_MODELS}
+mkdir -p "${SCRATCH_MODELS}"
 # Copy the FB Inference Model and the Training Model (separately)
-rsync --archive --compress ${HOME}/models/LFB/Base/feature_bank.base.pth ${SCRATCH_MODELS}/feature_bank.base.pth
+rsync --archive --compress "${HOME}/models/LFB/Base/feature_bank.base.pth" "${SCRATCH_MODELS}/feature_bank.base.pth"
 rsync --archive --compress ${HOME}/models/LFB/Trained/${MODEL_PATH} ${SCRATCH_MODELS}/inference.trained.pth
 echo "   .. Synchronising and Formatting Configs .. "
 cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
@@ -92,12 +98,14 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<FRAMES>@${FRAME_OFFSET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/code/MMAction/configs/own/infer.base.py ${SCRATCH_MODELS}/infer.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<FRAMES>@${FRAME_OFFSET}@" ${SCRATCH_MODELS}/infer.py
 echo "    == Models Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
@@ -142,7 +150,6 @@ echo ""
 # Copy Data
 # ===========
 echo " ===================================="
-RESULT_PATH="${HOME}/results/LFB/${CONFIG_PATH}"
 echo " Copying Results to ${RESULT_PATH}"
 mkdir -p "${RESULT_PATH}"
 rsync --archive --compress "${SCRATCH_OUT}/" "${RESULT_PATH}/"
