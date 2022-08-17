@@ -13,7 +13,7 @@
 #     [Warmup]   - Warmup Period (epochs)
 #     [Offset]   - Offset from base data location to retrieve the data splits
 #     [Frame_Off]- Frame Directory to use
-#     [Frame Num]- Starting Index for Frame Numbering
+#     [Frame_Num]- Starting Index for Frame Numbering
 #     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
 #                       known that the machine contains the right data splits.
 #     [Features] - Y/N: If Y, force regenerate feature-banks.
@@ -101,7 +101,6 @@ sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank
 sed -i "s@<DATASET>@Train@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.train.py
-sed -i "s@<NUM_BTIS>@119@" ${SCRATCH_MODELS}/feature_bank.train.py
 #  Update V-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
@@ -109,7 +108,6 @@ sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.valid.py
-sed -i "s@<NUM_BTIS>@119@" ${SCRATCH_MODELS}/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
@@ -118,7 +116,6 @@ sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/t
 sed -i "s@<MODELOUT>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/train.py
-sed -i "s@<NUM_BTIS>@119@" ${SCRATCH_MODELS}/train.py
 echo "    == Models Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
