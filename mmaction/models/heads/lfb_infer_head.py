@@ -45,7 +45,7 @@ class LFBInferHead(nn.Module):
                 print(f'lfb prefix path {lfb_prefix_path} does not exist. '
                       f'Creating the folder...')
                 mmcv.mkdir_or_exist(lfb_prefix_path)
-            print('\nInferring LFB...')
+            # print('\nInferring LFB...')
 
         assert temporal_pool_type in ['max', 'avg']
         assert spatial_pool_type in ['max', 'avg']
@@ -110,8 +110,8 @@ class LFBInferHead(nn.Module):
             osp.join(self.lfb_prefix_path,
                      f'_lfb_{self.dataset_mode}_{rank}.pkl'))
         torch.save(_lfb, _lfb_file_path)
-        print(f'{len(self.all_features)} features from {len(_lfb)} videos '
-              f'on GPU {rank} have been stored in {_lfb_file_path}.')
+        # print(f'{len(self.all_features)} features from {len(_lfb)} videos '
+        #       f'on GPU {rank} have been stored in {_lfb_file_path}.')
 
         # Synchronizes all processes to make sure all gpus have stored their
         # roi features
@@ -120,7 +120,7 @@ class LFBInferHead(nn.Module):
         if rank > 0:
             return
 
-        print('Gathering all the roi features...')
+        # print('Gathering all the roi features...')
 
         lfb = {}
         for rank_id in range(world_size):
@@ -141,7 +141,7 @@ class LFBInferHead(nn.Module):
         lfb_file_path = osp.normpath(
             osp.join(self.lfb_prefix_path, f'lfb_{self.dataset_mode}.pkl'))
         torch.save(lfb, lfb_file_path)
-        print(f'LFB has been constructed in {lfb_file_path}!')
+        # print(f'LFB has been constructed in {lfb_file_path}!')
 
 
 if mmdet_imported:

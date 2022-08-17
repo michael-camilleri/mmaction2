@@ -6,20 +6,23 @@
 #
 #  Script takes the following parameters: note that the batch size is defined by the product of
 #    Cores and Images.
-#     [Cores]    - Number of GPUs to use to Train Model
-#     [Images]   - Number of Images (Samples) per-GPU
-#     [Rate]     - Learning Rate (actual value used, not dependent on Batch-Size)
-#     [Epochs]   - Maximum Number of Epochs to train for
-#     [Warmup]   - Warmup Period (epochs)
-#     [Offset]   - Offset from base data location to retrieve the data splits
-#     [Frame_Off]- Frame Directory to use
-#     [Frame_Num]- Starting Index for Frame Numbering
-#     [Frames]   - Y/N: Indicates if Frames should be rsynced: this is done to save time if it is
-#                       known that the machine contains the right data splits.
-#     [Features] - Y/N: If Y, force regenerate feature-banks.
+#     [CLIP_LEN]     - Clip Length for AVA Sampler
+#     [STRIDE]       - Inter-Frame Sampling Interval
+
+#     [GPU_NODES]    - Number of GPUs to use to Train Model
+#     [IMAGE_GPU]    - Number of Images (Samples) per-GPU
+#     [LEARN_RATE]   - Learning Rate (actual value used, not dependent on Batch-Size)
+#     [MAX_EPOCHS]   - Maximum Number of Epochs to train for
+
+#     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
+#     [FRAMES_DIR]   - Frame Directory to use (offset from base location)
+#     [FRAME_NUM]    - Starting Index for Frame Numbering
+#     [FORCE_FRAMES] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it
+#                           is known that the machine contains the right data splits.
+#     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo2 bash/finetune_lfb.sh 4 4 0.0005 50 5 Fixed Frames_DCE 125 N Y &> ~/logs/train_lfb.0005_5_DCE.Fixed.out
+#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 5 16 4 4 0.0005 50 Fixed Frames_Raw_Ext 125 N Y &> ~/logs/train_lfb.C5S16.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -29,26 +32,29 @@
 
 ####  Some Configurations
 # Get and store the main Parameters
-GPU_NODES=${1}
-IMAGE_GPU=${2}
-LEARN_RATE=${3}
-MAX_EPOCHS=${4}
-WARMUP_ITER=${5}
-PATH_OFFSET=${6}
-FRAMES_DIR=${7}
-FRAME_NUM=${8}
-FORCE_FRAMES=${9,,}
-FORCE_LFB=${10,,}
+CLIP_LEN=${1}
+STRIDE=${2}
+
+GPU_NODES=${3}
+IMAGE_GPU=${4}
+LEARN_RATE=${5}
+MAX_EPOCHS=${6}
+
+PATH_OFFSET=${7}
+FRAMES_DIR=${8}
+FRAME_NUM=${9}
+FORCE_FRAMES=${10,,}
+FORCE_LFB=${11,,}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
-OUT_NAME=${MAX_EPOCHS}_${BATCH_SIZE}_L${LEARN_RATE}_W${WARMUP_ITER}_RJ_${FRAMES_DIR}_EXT
+OUT_NAME=LFB_C${CLIP_LEN}_S${STRIDE}_L${LEARN_RATE}
 
 # Path Values
 SCRATCH_HOME=/disk/scratch/${USER}
 SCRATCH_DATA=${SCRATCH_HOME}/data/behaviour
-SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_train
-SCRATCH_OUT=${SCRATCH_HOME}/results_train
+SCRATCH_MODELS=${SCRATCH_HOME}/models/lfb_train/${OUT_NAME}
+SCRATCH_OUT=${SCRATCH_HOME}/results_train/${OUT_NAME}
 OUTPUT_DIR="${HOME}/models/LFB/Trained/${PATH_OFFSET}/${OUT_NAME}"
 
 # ===================
@@ -97,21 +103,21 @@ cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone
 #  Update T-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
-sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<OUTPUT>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<DATASET>@Train@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.train.py
 #  Update V-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
-sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<OUTPUT>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
-sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<FEATUREBANK>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELOUT>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/train.py
@@ -127,34 +133,34 @@ echo ""
 echo " ===================================="
 echo " Generating Feature-Bank Vectors "
 echo "  -> Training Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Train.pkl" ] && [ "${FORCE_LFB}" = "n" ]; then
+if [ -f "${SCRATCH_MODELS}/feature_bank/lfb_Train.pkl" ] && [ "${FORCE_LFB}" = "n" ]; then
   echo "    Training FB Exists and not Forced to regenerate: skipping."
 else
   echo "    Re-Generating"
   python tools/test.py \
       ${SCRATCH_MODELS}/feature_bank.train.py \
       ${SCRATCH_MODELS}/feature_bank.base.pth \
-      --out ${SCRATCH_DATA}/feature_bank/train.csv \
+      --out ${SCRATCH_MODELS}/feature_bank/train.csv \
       --cfg-options data.test.start_index="${FRAME_NUM}"
   echo "     Training FB Done"
 fi
 echo " ------------------------------"
 echo "  -> Validation Set"
-if [ -f "${SCRATCH_DATA}/feature_bank/lfb_Validate.pkl" ] && [ "${FORCE_LFB}" = "n" ]; then
+if [ -f "${SCRATCH_MODELS}/feature_bank/lfb_Validate.pkl" ] && [ "${FORCE_LFB}" = "n" ]; then
   echo "    Validation FB Exists and not Forced to regenerate: skipping."
 else
   echo "    Re-Generating"
   python tools/test.py \
       "${SCRATCH_MODELS}/feature_bank.valid.py" \
       "${SCRATCH_MODELS}/feature_bank.base.pth" \
-      --out "${SCRATCH_DATA}/feature_bank/validate.csv" \
+      --out "${SCRATCH_MODELS}/feature_bank/validate.csv" \
       --cfg-options data.test.start_index="${FRAME_NUM}"
   echo "     Validation FB Done"
 fi
 echo " ------------------------------"
 echo "  -> Cleaning up"
-rm -rf ${SCRATCH_DATA}/feature_bank/_lfb_*
-rm -rf ${SCRATCH_DATA}/feature_bank/*.csv
+rm -rf ${SCRATCH_MODELS}/feature_bank/_lfb_*
+rm -rf ${SCRATCH_MODELS}/feature_bank/*.csv
 echo "  == FB Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
 echo ""
@@ -167,7 +173,7 @@ echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RA
 python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" tools/train.py \
     "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" lr_config.warmup_iters="${WARMUP_ITER}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}"
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}" train_pipeline.0.clip_len="${CLIP_LEN}" train_pipeline.0.frame_interval="${STRIDE}"
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
@@ -180,7 +186,7 @@ mkdir -p ${OUTPUT_DIR}
 echo " Copying Model Weights to ${OUTPUT_DIR}"
 rsync --archive --compress --info=progress2 "${SCRATCH_OUT}/" "${OUTPUT_DIR}"
 echo " Copying also LFB Features"
-rsync --archive --compress --info=progress2 "${SCRATCH_DATA}/feature_bank/" "${OUTPUT_DIR}"
+rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/feature_bank/" "${OUTPUT_DIR}"
 rm -rf "${SCRATCH_OUT}"
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}'."

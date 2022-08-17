@@ -328,6 +328,8 @@ def main():
         torch.backends.cudnn.benchmark = True
     cfg.data.test.test_mode = True
 
+    cfg.dump(osp.join(cfg.work_dir, osp.basename(args.config)))
+
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False

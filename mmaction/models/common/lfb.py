@@ -127,9 +127,9 @@ class LFB:
         for dataset_mode in self.dataset_modes:
             lfb_path = osp.normpath(
                 osp.join(self.lfb_prefix_path, f'lfb_{dataset_mode}.pkl'))
-            print(f'Loading LFB from {lfb_path}...')
+            # print(f'Loading LFB from {lfb_path}...')
             self.lfb.update(torch.load(lfb_path, map_location=map_location))
-        print(f'LFB has been loaded on {map_location}.')
+        # print(f'LFB has been loaded on {map_location}.')
 
     def load_lfb_on_lmdb(self):
         lfb = {}
