@@ -53,6 +53,8 @@ sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
+sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<NUM_BTIS>@119@" ${SCRATCH_MODELS}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/Documents/Code/MMAction2/configs/own/infer.base.py ${SCRATCH_OUT}/infer.py
 sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/infer.py
@@ -60,6 +62,8 @@ sed -i "s@<FEATUREBANK>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/infer.py
+sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<NUM_BTIS>@119@" ${SCRATCH_MODELS}/infer.py
 
 # ======================
 # Generate Feature Banks

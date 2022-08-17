@@ -98,6 +98,12 @@ def parse_args():
         '--tensorrt',
         action='store_true',
         help='Whether to test with TensorRT engine or not')
+    parser.add_argument(
+        '--nolog',
+        action='store_true',
+        default=False,
+        help="If set, then do not log"
+    )
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -151,7 +157,7 @@ def inference_pytorch(args, cfg, distributed, data_loader):
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    load_checkpoint(model, args.checkpoint, map_location='cpu')
+    load_checkpoint(model, args.checkpoint, map_location='cpu', logger="silent" if args.nolog else None)
 
     if args.fuse_conv_bn:
         model = fuse_conv_bn(model)
@@ -356,7 +362,8 @@ def main():
     if rank == 0:
         if output_config.get('out', None):
             out = output_config['out']
-            print(f'\nwriting results to {out}')
+            if not args.nolog:
+                print(f'\nwriting results to {out}')
             dataset.dump_results(outputs, **output_config)
         if eval_config:
             eval_res = dataset.evaluate(outputs, **eval_config)
