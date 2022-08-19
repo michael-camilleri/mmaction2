@@ -177,7 +177,7 @@ echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RA
 python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" --master_port="${PORT}" tools/train.py \
     "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}"
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.val.start_index="${FRAME_NUM}"
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
