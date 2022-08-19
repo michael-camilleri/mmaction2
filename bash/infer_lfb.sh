@@ -6,16 +6,21 @@
 #
 #  Script takes the following parameter
 #     [MODEL_PATH]    - Path (relative to ${HOME}/models/LFB/Trained) for the Model Weights
+#
+#     [CLIP_LEN]     - Clip Length for AVA Sampler
+#     [STRIDE]       - Inter-Frame Sampling Interval
+#
 #     [DATASET]       - Which DataSet to evaluate (Train/Validate/Predict/Test)
-#     [DATA_OFFSET]   - Offset from base data location to retrieve the data splits
-#     [FRAME_OFFSET]  - Offset from base data location to retrieve Images
-#     [FRAME_NUM]     - Starting Index for Frame Numbering
-#     [COPY_FRAMES]   - Y/N: Indicates if Frames should be rsynced: this is done to save time
-#                       if it is known that the machine contains the right data splits.
-#     [FORCE_LFB]     - Y/N: If Y, force regenerate feature-banks.
+#     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
+#     [FRAMES_DIR]   - Frame Directory to use (offset from base location)
+#     [FRAME_NUM]    - Starting Index for Frame Numbering
+#
+#     [FORCE_FRAMES] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it
+#                           is known that the machine contains the right data splits.
+#     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/SOTA/trained.pth Validate Fixed Frames_Raw_Ext 125 Y Y &> ~/logs/infer_lfb.000001.out
+#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/SOTA/trained.pth 4 16 Validate Fixed Frames_Raw_Ext 125 Y Y &> ~/logs/infer_lfb.000001.out
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -27,12 +32,17 @@
 ####  Some Configurations
 # Get and store the main Parameters
 MODEL_PATH=${1}
-DATASET=${2}
-DATA_OFFSET=${3}
-FRAME_OFFSET=${4}
-FRAME_NUM=${5}
-COPY_FRAMES=${6,,}
-FORCE_LFB=${7,,}
+
+CLIP_LEN=${2}
+STRIDE=${3}
+
+DATASET=${4}
+PATH_OFFSET=${5}
+FRAMES_DIR=${6}
+FRAME_NUM=${7}
+
+FORCE_FRAMES=${8,,}
+FORCE_LFB=${9,,}
 
 # Derivative Values
 CONFIG_PATH=$(dirname "${MODEL_PATH}")
@@ -76,11 +86,11 @@ echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
 echo "     .. Annotations .."
 rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${DATA_OFFSET}/${DATASET}" "${SCRATCH_DATA}/"
-if [ "${COPY_FRAMES}" = "y" ]; then
+      --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${PATH_OFFSET}/${DATASET}" "${SCRATCH_DATA}/"
+if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  mkdir -p "${SCRATCH_DATA}/${FRAME_OFFSET}"
-  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${FRAME_OFFSET}" "${SCRATCH_DATA}/"
+  mkdir -p "${SCRATCH_DATA}/${FRAMES_DIR}"
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${FRAMES_DIR}" "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
@@ -98,7 +108,7 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
-sed -i "s@<FRAMES>@${FRAME_OFFSET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/code/MMAction/configs/own/infer.base.py ${SCRATCH_MODELS}/infer.py
@@ -106,8 +116,10 @@ sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/infer.py
-sed -i "s@<FRAMES>@${FRAME_OFFSET}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/infer.py
 echo "    == Models Done =="
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""

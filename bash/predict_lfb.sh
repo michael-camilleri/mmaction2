@@ -5,6 +5,9 @@
 #     Runs inference on the Predict Set (folds) on MPCWork
 #
 #  Script takes the following parameter
+#     [CLIP_LEN]     - Clip Length for AVA Sampler
+#     [STRIDE]       - Inter-Frame Sampling Interval
+#
 #     [FOLD_NUM] - Fold Number
 #     [BEST_MDL] - Name for best model
 #
@@ -14,8 +17,11 @@
 
 ####  Some Configurations
 # Get and store the main Parameters
-FOLD_NUM=${1}
-BEST_MDL=${2}
+CLIP_LEN=${1}
+STRIDE=${2}
+
+FOLD_NUM=${3}
+BEST_MDL=${4}
 
 # ===================
 # Environment setup
@@ -62,6 +68,8 @@ sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/infer.py
 
 # ======================
 # Generate Feature Banks

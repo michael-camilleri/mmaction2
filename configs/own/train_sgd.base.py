@@ -30,6 +30,7 @@ Model_Path = '<MODELINIT>' # Initial Model
 Output_Path = '<MODELOUT>'   # Working Directory
 Frames_Offset = '<FRAMES>'
 Image_Template = '<IMAGE_TEMPLATE>'
+Sampling = (int('<CLEN>'), int('<STRIDE>'))
 Annotation_File = 'AVA.Behaviours.csv'
 Label_File = 'AVA.Actions.pbtxt'
 Detections_File = 'AVA.Detections.pkl'
@@ -83,7 +84,7 @@ model = dict(
 
 # Training (and Validation) Pipelines
 train_pipeline = [
-    dict(type='SampleAVAFrames', clip_len=4, frame_interval=16),
+    dict(type='SampleAVAFrames', clip_len=Sampling[0], frame_interval=Sampling[1]),
     dict(type='RawFrameDecode'),
     dict(type='RandomRescale', scale_range=(256, 320)),
     dict(type='RandomCrop', size=256),
@@ -105,7 +106,7 @@ train_pipeline = [
 ]
 
 val_pipeline = [ # The testing is w/o. any cropping / flipping
-    dict(type='SampleAVAFrames', clip_len=4, frame_interval=16, test_mode=True),
+    dict(type='SampleAVAFrames', clip_len=Sampling[0], frame_interval=Sampling[1], test_mode=True),
     dict(type='RawFrameDecode'),
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),

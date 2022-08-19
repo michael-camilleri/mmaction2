@@ -21,6 +21,7 @@ Feature_Path = '<FEATUREBANK>'  # Path to where Feature-Bank is stored
 Output_Path = '<RESULTS>'   # Working Directory
 Frames_Offset = '<FRAMES>'
 Image_Template = '<IMAGE_TEMPLATE>'
+Sampling = (int('<CLEN>'), int('<STRIDE>'))
 Annotation_File = 'AVA.Behaviours.csv'
 Label_File = 'AVA.Actions.pbtxt'
 Detections_File = 'AVA.Detections.pkl'
@@ -74,7 +75,7 @@ model = dict(
 
 # Testing Pipeline
 infer_pipeline = [ # The testing is w/o. any cropping / flipping
-    dict(type='SampleAVAFrames', clip_len=4, frame_interval=16, test_mode=True),
+    dict(type='SampleAVAFrames', clip_len=Sampling[0], frame_interval=Sampling[1], test_mode=True),
     dict(type='RawFrameDecode'),
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **ImageNormalisation),

@@ -22,7 +22,7 @@
 #     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 5 16 4 4 0.0005 50 Fixed Frames_Raw_Ext 125 N Y &> ~/logs/train_lfb.C5S16.out
+#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 5 16 4 4 0.0005 50 Fixed Frames_Raw_Ext 125 N Y [29500] &> ~/logs/train_lfb.C5S16.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -45,6 +45,8 @@ FRAMES_DIR=${8}
 FRAME_NUM=${9}
 FORCE_FRAMES=${10,,}
 FORCE_LFB=${11,,}
+
+PORT=${12:-29500}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
@@ -122,6 +124,8 @@ sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/t
 sed -i "s@<MODELOUT>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/train.py
 echo "    == Models Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
@@ -170,10 +174,10 @@ echo ""
 # ===========
 echo " ===================================="
 echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${MAX_EPOCHS} epochs"
-python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" tools/train.py \
+python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" --master_port="${PORT}" tools/train.py \
     "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}" train_pipeline.0.clip_len="${CLIP_LEN}" train_pipeline.0.frame_interval="${STRIDE}"
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.test.start_index="${FRAME_NUM}"
 echo "   == Training Done =="
 mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
