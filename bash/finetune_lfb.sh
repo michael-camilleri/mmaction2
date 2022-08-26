@@ -84,7 +84,7 @@ echo "  -> Synchronising Data"
 echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* "${SCRATCH_DATA}/"
 echo "     .. Annotations .."
-rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
+rsync --archive --compress --include '*/' --include 'AVA*' --exclude '*' \
       --info=progress2 "${HOME}/data/behaviour/Train/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
@@ -99,7 +99,7 @@ echo "  -> Synchronising Models"
 echo "   .. Copying Models .. "
 mkdir -p ${SCRATCH_MODELS}
 mkdir -p ${SCRATCH_OUT}
-rsync --archive --update --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
+rsync --archive --compress ${HOME}/models/LFB/Base/ ${SCRATCH_MODELS}/
 echo "   .. Synchronising and Formatting Configs .. "
 cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
 #  Update T-Specific FB Config

@@ -21,7 +21,8 @@ We provide some tips for MMAction2 installation in this file.
  To install on SLURM nodes, follow the steps below:
   1. Start an interactive session on a GPU node - this ensures that pytorch picks up the GPU
   2. Create environment: use python=3.7
-  3. Set Environment Activation Scripts to initialise GCC to v5.5
+  3. Set Environment Activation Scripts to initialise GCC to v5.5 .
+     Note, that as a last resort, can install GCC5 via `conda install -c psi4 gcc-5`
   4. Set `export CUDA_HOME='/opt/cuda-10.2.89_440_33'` (just in case)
   5. Install HIPCC:
       ```bash

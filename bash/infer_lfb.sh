@@ -20,7 +20,7 @@
 #     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=23:00:00 --gres=gpu:1 --nodelist=charles13 bash/infer_lfb.sh Fixed/SOTA/trained.pth 4 16 Validate Fixed Frames_Raw_Ext 125 Y Y &> ~/logs/infer_lfb.000001.out
+#     sbatch --time=23:00:00 --gres=gpu:1 --mem=40G -c4 --nodelist=charles14 bash/infer_lfb.sh SOTA/model.pth 11 8 Train Fixed Frames_Raw_Ext 125 N Y
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -169,7 +169,7 @@ mkdir -p "${RESULT_PATH}"
 rsync --archive --compress "${SCRATCH_OUT}/" "${RESULT_PATH}/"
 echo " Copying also LFB Features and Config File for posterity"
 rsync --archive --compress "${SCRATCH_DATA}/feature_bank/lfb_${DATASET}.pkl" "${RESULT_PATH}/"
-cp "${SCRATCH_MODELS}/infer.py" "${RESULT_PATH}/infer.py"
+cp "${SCRATCH_MODELS}/infer.py" "${RESULT_PATH}/infer_${DATASET}.py"
 rm -rf "${SCRATCH_OUT}"
 echo "   ++ ALL DONE! Hurray! ++"
 mail -s "Infer_LFB for ${DATASET} on ${SLURM_JOB_NODELIST}:${CONFIG_NAME}" ${USER}@sms.ed.ac.uk <<< "Outputs copied to '${HOME}/results/LFB/${CONFIG_NAME}'."
