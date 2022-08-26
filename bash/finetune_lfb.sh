@@ -22,7 +22,7 @@
 #     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     srun --time=2-23:00:00 --gres=gpu:4 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 5 16 4 4 0.0005 50 Fixed Frames_Raw_Ext 125 N Y [29500] &> ~/logs/train_lfb.C5S16.out
+#     sbatch --time=2-23:00:00 --gres=gpu:8 --mem=80G -c20 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 11 8 8 2 0.0005 35 Folds/1 Frames_Raw_Ext 125 Y Y 29500
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -127,7 +127,7 @@ sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/train.py
 echo "    == Models Done =="
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
+#mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Synchronised Data and Models."
 echo ""
 
 # ======================
@@ -166,7 +166,7 @@ echo "  -> Cleaning up"
 rm -rf ${SCRATCH_MODELS}/feature_bank/_lfb_*
 rm -rf ${SCRATCH_MODELS}/feature_bank/*.csv
 echo "  == FB Done =="
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
+#mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Generated Feature Banks"
 echo ""
 
 # ===========
@@ -179,7 +179,7 @@ python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" --master_port
     --validate --seed 0 --deterministic \
     --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.val.start_index="${FRAME_NUM}"
 echo "   == Training Done =="
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
+#mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
 
 # ===========
@@ -191,7 +191,6 @@ echo " Copying Model Weights to ${OUTPUT_DIR}"
 rsync --archive --compress --info=progress2 "${SCRATCH_OUT}/" "${OUTPUT_DIR}"
 echo " Copying also LFB Features"
 rsync --archive --compress --info=progress2 "${SCRATCH_MODELS}/feature_bank/" "${OUTPUT_DIR}"
-rm -rf "${SCRATCH_OUT}"
 echo "   ++ ALL DONE! Hurray! ++"
-mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}'."
+#mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Output Models copied to '${OUTPUT_DIR}'."
 conda deactivate
