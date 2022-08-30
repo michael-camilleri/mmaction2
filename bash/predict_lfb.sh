@@ -12,7 +12,7 @@
 #     [BEST_MDL] - Name for best model
 #
 #  USAGE:
-#     bash/predict_lfb.sh 9 49 &> predict_lfb.9.out
+#     bash/predict_lfb.sh 11 8 1 25 &> predict_lfb.1.out
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 ####  Some Configurations
@@ -30,6 +30,10 @@ set -e # Make script bail out after first error
 source activate py3mma   # Activate Conda Environment
 echo "Libraries from: ${LD_LIBRARY_PATH}"
 
+# Setup some Config Options
+export OMP_NUM_THREADS=4
+export MKL_NUM_THREADS=4
+
 # Setup NCCL Debug Status
 export NCCL_DEBUG=INFO
 
@@ -38,10 +42,10 @@ FRAMES_DIR="../../Frames_Raw_Ext"
 FEATURE_MDL="/media/veracrypt5/MRC_Data/Models/LFB/Base/feature_bank.base.pth"
 
 # Scratch Space
-SCRATCH_OUT="/media/veracrypt5/Scratch/LFB/out/${FOLD_NUM}"
+SCRATCH_OUT="/home/s1238640/Documents/Data/scratch_${FOLD_NUM}"
 
 # Variables
-MODEL_FILE="/media/veracrypt5/MRC_Data/Models/LFB/Trained/Folds/${FOLD_NUM}/epoch_${BEST_MDL}.pth"
+MODEL_FILE="/media/veracrypt5/MRC_Data/Models/LFB/Trained/Folds/C11_S8_L5e-4/${FOLD_NUM}/epoch_${BEST_MDL}.pth"
 DATA_DIR="/media/veracrypt4/Q1/Snippets/Curated/Behaviour/Train/Folds/${FOLD_NUM}"
 
 # Create Folders
@@ -59,7 +63,7 @@ sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
-sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_OUT}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/Documents/Code/MMAction2/configs/own/infer.base.py ${SCRATCH_OUT}/infer.py
 sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/infer.py
@@ -67,9 +71,9 @@ sed -i "s@<FEATUREBANK>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/infer.py
-sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/infer.py
-sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/infer.py
-sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_OUT}/infer.py
+sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_OUT}/infer.py
+sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_OUT}/infer.py
 
 # ======================
 # Generate Feature Banks

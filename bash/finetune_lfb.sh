@@ -30,6 +30,14 @@
 #        in my Jupyter notebook.
 #    Model PTHs are under ${HOME}/models/LFB/Base/ : Configs are part of the Repository
 
+#  Warning
+#    * When Running multiple jobs on same machine note that the data splits are shared: i.e. if
+#      using a different datasplit (e.g. folds), this will conflict.
+#    * This also means that you have to manually clean up after the job to ensure that it is ok.
+#    * The reason I do not clean up automatically, is that there may be reasons why multiple jobs
+#      are running simultaneously (if same data but different configs) and hence, I must not delete
+#      data once one finishes.
+
 ####  Some Configurations
 # Get and store the main Parameters
 CLIP_LEN=${1}
