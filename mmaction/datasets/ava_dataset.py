@@ -111,6 +111,7 @@ class AVADataset(BaseDataset):
                  num_max_proposals=1000,
                  timestamp_start=900,
                  timestamp_end=1800,
+                 sample_by_class=False,
                  fps=30):
         # since it inherits from `BaseDataset`, some arguments
         # should be assigned before performing `load_annotations()`
@@ -143,7 +144,9 @@ class AVADataset(BaseDataset):
             test_mode,
             start_index=start_index,
             modality=modality,
-            num_classes=num_classes)
+            num_classes=num_classes,
+            sample_by_class=sample_by_class,
+        )
 
         if self.proposal_file is not None:
             self.proposals = mmcv.load(self.proposal_file)
