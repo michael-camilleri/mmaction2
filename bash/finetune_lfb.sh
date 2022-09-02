@@ -56,7 +56,7 @@ FRAME_NUM=${10}
 FORCE_FRAMES=${11,,}
 FORCE_LFB=${12,,}
 
-PORT=${12:-29500}
+PORT=${13:-29500}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
