@@ -111,7 +111,6 @@ class AVADataset(BaseDataset):
                  num_max_proposals=1000,
                  timestamp_start=900,
                  timestamp_end=1800,
-                 sample_by_class=False,
                  fps=30):
         # since it inherits from `BaseDataset`, some arguments
         # should be assigned before performing `load_annotations()`
@@ -145,7 +144,7 @@ class AVADataset(BaseDataset):
             start_index=start_index,
             modality=modality,
             num_classes=num_classes,
-            sample_by_class=sample_by_class,
+            sample_by_class=False,
         )
 
         if self.proposal_file is not None:
@@ -259,10 +258,8 @@ class AVADataset(BaseDataset):
 
         for img_key in records_dict_by_img:
             video_id, timestamp = img_key.split(',')
-            bboxes, labels, entity_ids = self.parse_img_record(
-                records_dict_by_img[img_key])
-            ann = dict(
-                gt_bboxes=bboxes, gt_labels=labels, entity_ids=entity_ids)
+            bboxes, labels, entity_ids = self.parse_img_record(records_dict_by_img[img_key])
+            ann = dict(gt_bboxes=bboxes, gt_labels=labels, entity_ids=entity_ids)
             frame_dir = video_id
             if self.data_prefix is not None:
                 frame_dir = osp.join(self.data_prefix, frame_dir)

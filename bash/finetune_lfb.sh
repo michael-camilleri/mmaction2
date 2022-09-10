@@ -13,7 +13,6 @@
 #     [IMAGE_GPU]    - Number of Images (Samples) per-GPU
 #     [LEARN_RATE]   - Learning Rate (actual value used, not dependent on Batch-Size)
 #     [MAX_EPOCHS]   - Maximum Number of Epochs to train for
-#     [RESAMPLE]     - If True, resample to balance out classes.
 
 #     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
 #     [FRAMES_DIR]   - Frame Directory to use (offset from base location)
@@ -23,7 +22,7 @@
 #     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     sbatch --time=2-23:00:00 --gres=gpu:8 --mem=80G -c20 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 11 8 8 2 0.0005 35 N Folds/1 Frames_Raw_Ext 125 Y Y 29500
+#     sbatch --time=2-23:00:00 --gres=gpu:8 --mem=80G -c20 --partition=apollo --nodelist=apollo1 bash/finetune_lfb.sh 11 8 8 2 0.0005 35 Folds/1 Frames_Raw_Ext 125 Y Y 29500
 #     * N.B.: The above should be run from the root MMAction2 directory.
 
 #  Data Structures
@@ -48,19 +47,18 @@ GPU_NODES=${3}
 IMAGE_GPU=${4}
 LEARN_RATE=${5}
 MAX_EPOCHS=${6}
-RESAMPLE=${7,,}
 
-PATH_OFFSET=${8}
-FRAMES_DIR=${9}
-FRAME_NUM=${10}
-FORCE_FRAMES=${11,,}
-FORCE_LFB=${12,,}
+PATH_OFFSET=${7}
+FRAMES_DIR=${8}
+FRAME_NUM=${9}
+FORCE_FRAMES=${10,,}
+FORCE_LFB=${11,,}
 
-PORT=${13:-29500}
+PORT=${12:-29500}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
-OUT_NAME=LFB_C${CLIP_LEN}_S${STRIDE}_L${LEARN_RATE}_R${RESAMPLE^^}
+OUT_NAME=LFB_C${CLIP_LEN}_S${STRIDE}_L${LEARN_RATE}
 
 # Path Values
 SCRATCH_HOME=/disk/scratch/${USER}
@@ -184,15 +182,10 @@ echo ""
 # ===========
 echo " ===================================="
 echo " Training Model with ${GPU_NODES} GPU(s)  (BS=${BATCH_SIZE}, LR=${LEARN_RATE}) for ${MAX_EPOCHS} epochs"
-if [ "${RESAMPLE}" = "y" ]; then
-  PER_CLASS='True'
-else
-  PER_CLASS='False'
-fi
 python -m torch.distributed.launch --nproc_per_node="${GPU_NODES}" --master_port="${PORT}" tools/train.py \
     "${SCRATCH_MODELS}/train.py" --launcher pytorch \
     --validate --seed 0 --deterministic \
-    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.val.start_index="${FRAME_NUM}" data.train.sample_by_class="${PER_CLASS}"
+    --cfg-options data.videos_per_gpu="${IMAGE_GPU}" optimizer.lr="${LEARN_RATE}" total_epochs="${MAX_EPOCHS}" data.train.start_index="${FRAME_NUM}" data.val.start_index="${FRAME_NUM}"
 echo "   == Training Done =="
 #mail -s "Train_LFB on ${SLURM_JOB_NODELIST}:${OUT_NAME}" ${USER}@sms.ed.ac.uk <<< "Model Training Completed."
 echo ""
