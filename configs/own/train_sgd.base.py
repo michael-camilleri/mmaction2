@@ -130,7 +130,6 @@ data = dict(
     train=dict(
         type='AVADataset',
         num_classes=9,
-        sample_by_class=True,
         fps=25,
         start_index=0,
         timestamp_start=0,
