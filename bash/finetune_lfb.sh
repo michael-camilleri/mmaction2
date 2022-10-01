@@ -15,7 +15,6 @@
 #     [MAX_EPOCHS]   - Maximum Number of Epochs to train for
 
 #     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
-#     [FRAMES_DIR]   - Frame Directory to use (offset from base location)
 #     [FRAME_NUM]    - Starting Index for Frame Numbering
 #     [FORCE_FRAMES] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it
 #                           is known that the machine contains the right data splits.
@@ -49,12 +48,11 @@ LEARN_RATE=${5}
 MAX_EPOCHS=${6}
 
 PATH_OFFSET=${7}
-FRAMES_DIR=${8}
-FRAME_NUM=${9}
-FORCE_FRAMES=${10,,}
-FORCE_LFB=${11,,}
+FRAME_NUM=${8}
+FORCE_FRAMES=${9,,}
+FORCE_LFB=${10,,}
 
-PORT=${12:-29500}
+PORT=${11:-29500}
 
 # Derivative Values
 BATCH_SIZE=$(echo "${GPU_NODES} * ${IMAGE_GPU}" | bc)
@@ -93,11 +91,10 @@ echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* "${SCRATCH_DATA}/"
 echo "     .. Annotations .."
 rsync --archive --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 "${HOME}/data/behaviour/Train/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
+      --info=progress2 "${HOME}/data/behaviour/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  mkdir -p "${SCRATCH_DATA}/${FRAMES_DIR}"
-  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Train/${FRAMES_DIR}" \
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Frames" \
         "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
@@ -115,14 +112,14 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<OUTPUT>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<DATASET>@Train@" ${SCRATCH_MODELS}/feature_bank.train.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.train.py
+sed -i "s@<FRAMES>@Frames@" ${SCRATCH_MODELS}/feature_bank.train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.train.py
 #  Update V-Specific FB Config
 cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<OUTPUT>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<DATASET>@Validate@" ${SCRATCH_MODELS}/feature_bank.valid.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.valid.py
+sed -i "s@<FRAMES>@Frames@" ${SCRATCH_MODELS}/feature_bank.valid.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.valid.py
 #  Update Training FB Config (Now using only SGD)
 cp ${HOME}/code/MMAction/configs/own/train_sgd.base.py ${SCRATCH_MODELS}/train.py
@@ -130,7 +127,7 @@ sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_MODELS}/feature_bank@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELINIT>@${SCRATCH_MODELS}/inference.base.pth@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<MODELOUT>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/train.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/train.py
+sed -i "s@<FRAMES>@Frames@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/train.py
 sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/train.py
