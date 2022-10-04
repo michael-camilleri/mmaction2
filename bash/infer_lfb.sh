@@ -10,9 +10,8 @@
 #     [CLIP_LEN]     - Clip Length for AVA Sampler
 #     [STRIDE]       - Inter-Frame Sampling Interval
 #
-#     [DATASET]       - Which DataSet to evaluate (Train/Validate/Predict/Test)
 #     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
-#     [FRAMES_DIR]   - Frame Directory to use (offset from base location)
+#     [DATASET]      - Which DataSet to evaluate (Train/Validate/Test)
 #     [FRAME_NUM]    - Starting Index for Frame Numbering
 #
 #     [FORCE_FRAMES] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it
@@ -36,22 +35,16 @@ MODEL_PATH=${1}
 CLIP_LEN=${2}
 STRIDE=${3}
 
-DATASET=${4}
-PATH_OFFSET=${5}
-FRAMES_DIR=${6}
-FRAME_NUM=${7}
+PATH_OFFSET=${4}
+DATASET=${5}
+FRAME_NUM=${6}
 
-FORCE_FRAMES=${8,,}
-FORCE_LFB=${9,,}
+FORCE_FRAMES=${7,,}
+FORCE_LFB=${8,,}
 
 # Derivative Values
 CONFIG_PATH=$(dirname "${MODEL_PATH}")
 CONFIG_NAME=$(basename "${CONFIG_PATH}")
-if [ "${DATASET,,}" = "test" ]; then
-  PARENT_DIR='Test'
-else
-  PARENT_DIR='Train'
-fi
 
 # ===================
 # Environment setup
@@ -86,11 +79,10 @@ echo "     .. Schemas .."
 cp ${HOME}/data/behaviour/Common/AVA* ${SCRATCH_DATA}/
 echo "     .. Annotations .."
 rsync --archive --update --compress --include '*/' --include 'AVA*' --exclude '*' \
-      --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${PATH_OFFSET}/${DATASET}" "${SCRATCH_DATA}/"
+      --info=progress2 "${HOME}/data/behaviour/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  mkdir -p "${SCRATCH_DATA}/${FRAMES_DIR}"
-  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/${PARENT_DIR}/${FRAMES_DIR}" "${SCRATCH_DATA}/"
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Frames" "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
@@ -100,7 +92,7 @@ echo "   .. Copying Models .. "
 mkdir -p "${SCRATCH_MODELS}"
 # Copy the FB Inference Model and the Training Model (separately)
 rsync --archive --compress "${HOME}/models/LFB/Base/feature_bank.base.pth" "${SCRATCH_MODELS}/feature_bank.base.pth"
-rsync --archive --compress ${HOME}/models/LFB/Trained/${MODEL_PATH} ${SCRATCH_MODELS}/inference.trained.pth
+rsync --archive --compress "${HOME}/models/LFB/Trained/${MODEL_PATH} ${SCRATCH_MODELS}/inference.trained.pth"
 echo "   .. Synchronising and Formatting Configs .. "
 cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
 #  Update Feature-Bank Config
@@ -108,7 +100,7 @@ cp ${HOME}/code/MMAction/configs/own/feature_bank.base.py ${SCRATCH_MODELS}/feat
 sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/feature_bank.eval.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/feature_bank.eval.py
+sed -i "s@<FRAMES>@Frames@" ${SCRATCH_MODELS}/feature_bank.eval.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/code/MMAction/configs/own/infer.base.py ${SCRATCH_MODELS}/infer.py
@@ -116,7 +108,7 @@ sed -i "s@<SOURCE>@${SCRATCH_DATA}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_DATA}/feature_bank@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<DATASET>@${DATASET}@" ${SCRATCH_MODELS}/infer.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_MODELS}/infer.py
+sed -i "s@<FRAMES>@Frames@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_MODELS}/infer.py
 sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_MODELS}/infer.py

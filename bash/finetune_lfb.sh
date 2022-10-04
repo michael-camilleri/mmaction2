@@ -94,8 +94,7 @@ rsync --archive --compress --include '*/' --include 'AVA*' --exclude '*' \
       --info=progress2 "${HOME}/data/behaviour/${PATH_OFFSET}/" "${SCRATCH_DATA}/"
 if [ "${FORCE_FRAMES}" = "y" ]; then
   echo "     .. Frames .."
-  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Frames" \
-        "${SCRATCH_DATA}/"
+  rsync --archive --update --info=progress2 "${HOME}/data/behaviour/Frames" "${SCRATCH_DATA}/"
 else
   echo "     .. Skipping Frames .."
 fi
