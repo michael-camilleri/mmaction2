@@ -19,7 +19,7 @@
 #     [FORCE_LFB]    - Y/N: If Y, force regenerate feature-banks.
 #
 #  USAGE:
-#     sbatch --time=23:00:00 --gres=gpu:1 --mem=40G -c4 --nodelist=charles14 bash/infer_lfb.sh SOTA/model.pth 11 8 Train Fixed Frames_Raw_Ext 125 N Y
+#     sbatch --time=5:00:00 --gres=gpu:1 --mem=40G -c4 --nodelist=charles12 bash/infer_lfb.sh SOTA/model.pth 11 8 Tuning/Fixed Train 0 N Y
 #     * N.B.: The above should be run from the root MMAction2 directory. If need be, you can specify which machine to
 #             run on explicitly through the --nodelist=charles<XX> argument
 #
@@ -92,7 +92,7 @@ echo "   .. Copying Models .. "
 mkdir -p "${SCRATCH_MODELS}"
 # Copy the FB Inference Model and the Training Model (separately)
 rsync --archive --compress "${HOME}/models/LFB/Base/feature_bank.base.pth" "${SCRATCH_MODELS}/feature_bank.base.pth"
-rsync --archive --compress "${HOME}/models/LFB/Trained/${MODEL_PATH} ${SCRATCH_MODELS}/inference.trained.pth"
+rsync --archive --compress "${HOME}/models/LFB/Trained/${MODEL_PATH}" "${SCRATCH_MODELS}/inference.trained.pth"
 echo "   .. Synchronising and Formatting Configs .. "
 cp ${HOME}/code/MMAction/configs/own/backbone.base.py ${SCRATCH_MODELS}/backbone.base.py
 #  Update Feature-Bank Config
