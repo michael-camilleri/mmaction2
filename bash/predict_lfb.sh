@@ -38,7 +38,6 @@ export MKL_NUM_THREADS=4
 export NCCL_DEBUG=INFO
 
 # Constants
-FRAMES_DIR="../../Frames_Raw_Ext"
 FEATURE_MDL="/media/veracrypt5/MRC_Data/Models/LFB/Base/feature_bank.base.pth"
 
 # Scratch Space
@@ -46,7 +45,7 @@ SCRATCH_OUT="/home/s1238640/Documents/Data/scratch_${FOLD_NUM}"
 
 # Variables
 MODEL_FILE="/media/veracrypt5/MRC_Data/Models/LFB/Trained/Folds/C11_S8_L5e-4/${FOLD_NUM}/epoch_${BEST_MDL}.pth"
-DATA_DIR="/media/veracrypt4/Q1/Snippets/Curated/Behaviour/Train/Folds/${FOLD_NUM}"
+DATA_DIR="/media/veracrypt4/Q1/Snippets/Curated/Behaviour/Tuning/Folds/${FOLD_NUM}"
 
 # Create Folders
 mkdir -p ${SCRATCH_OUT}
@@ -62,7 +61,7 @@ cp ${HOME}/Documents/Code/MMAction2/configs/own/feature_bank.base.py ${SCRATCH_O
 sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<OUTPUT>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/feature_bank.eval.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/feature_bank.eval.py
+sed -i "s@<FRAMES>@../../../Frames@" ${SCRATCH_OUT}/feature_bank.eval.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_OUT}/feature_bank.eval.py
 #  Update Inference Config
 cp ${HOME}/Documents/Code/MMAction2/configs/own/infer.base.py ${SCRATCH_OUT}/infer.py
@@ -70,7 +69,7 @@ sed -i "s@<SOURCE>@${DATA_DIR}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<FEATUREBANK>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<RESULTS>@${SCRATCH_OUT}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<DATASET>@Predict@" ${SCRATCH_OUT}/infer.py
-sed -i "s@<FRAMES>@${FRAMES_DIR}@" ${SCRATCH_OUT}/infer.py
+sed -i "s@<FRAMES>@../../../Frames@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<IMAGE_TEMPLATE>@img_{:05d}.jpg@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<CLEN>@${CLIP_LEN}@" ${SCRATCH_OUT}/infer.py
 sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_OUT}/infer.py
@@ -81,7 +80,7 @@ sed -i "s@<STRIDE>@${STRIDE}@" ${SCRATCH_OUT}/infer.py
 echo " ===================================="
 echo "  Generating FB"
 python tools/test.py \
-      ${SCRATCH_OUT}/feature_bank.eval.py ${FEATURE_MDL} --out ${SCRATCH_OUT}/fb.csv --cfg-options data.test.start_index=125
+      ${SCRATCH_OUT}/feature_bank.eval.py ${FEATURE_MDL} --out ${SCRATCH_OUT}/fb.csv --cfg-options data.test.start_index=0
 rm -rf "${SCRATCH_OUT}/_lfb_*"
 rm -rf "${SCRATCH_OUT}/*.csv"
 
@@ -91,5 +90,5 @@ rm -rf "${SCRATCH_OUT}/*.csv"
 echo " ===================================="
 echo " Inferring Behaviours"
 python tools/test.py \
-    "${SCRATCH_OUT}"/infer.py "${MODEL_FILE}" --out "${SCRATCH_OUT}/Predict.csv" --cfg-options data.test.start_index=125
+    "${SCRATCH_OUT}"/infer.py "${MODEL_FILE}" --out "${SCRATCH_OUT}/Predict.csv" --cfg-options data.test.start_index=0
 echo "   == Inference Done =="
