@@ -36,6 +36,7 @@ ImageNormalisation = dict(
 max_num_sampled_feat = 5
 window_size = 60
 lfb_channels = 2048
+num_classes=8
 
 ################## STANDARD VALUES ##################
 
@@ -65,7 +66,7 @@ model = dict(
                 pre_activate=True)),
         bbox_head=dict(
                 in_channels=2560,
-                num_classes=9,   # Changed from 81
+                num_classes=num_classes,   # Changed from 81
                 multilabel=False, # Enforce single-label
         )
     ),
@@ -96,7 +97,7 @@ data = dict(
     workers_per_gpu=2,    
     test=dict(
         type='AVADataset',
-        num_classes=9,
+        num_classes=num_classes,
         fps=25,
         start_index=0,
         timestamp_start=0,
