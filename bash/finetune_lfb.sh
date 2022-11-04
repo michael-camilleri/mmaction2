@@ -32,7 +32,10 @@
 #  Warning
 #    * When Running multiple jobs on same machine note that the data splits are shared: i.e. if
 #      using a different datasplit (e.g. folds), this will conflict.
-#    * This also means that you have to manually clean up after the job to ensure that it is ok.
+#    * This also means that you have to manually clean up (below) after the job before running more:
+#         1. ${SCRATCH_HOME}/data/behaviour (apart from Frames)
+#         2. ${SCRATCH_HOME}/models,
+#         3. ${SCRATCH_HOME}/results_train
 #    * The reason I do not clean up automatically, is that there may be reasons why multiple jobs
 #      are running simultaneously (if same data but different configs) and hence, I must not delete
 #      data once one finishes.
