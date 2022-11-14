@@ -11,7 +11,7 @@
 #     [STRIDE]       - Inter-Frame Sampling Interval
 #
 #     [PATH_OFFSET]  - Offset from base data location to retrieve the data splits
-#     [DATASET]      - Which DataSet to evaluate (Train/Validate/Test)
+#     [DATASET]      - Which DataSet to evaluate (Train/Validate/Test/Predict/Tune)
 #     [FRAME_NUM]    - Starting Index for Frame Numbering
 #
 #     [FORCE_FRAMES] - Y/N: Indicates if Frames should be rsynced: this is done to save time if it

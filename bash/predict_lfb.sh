@@ -44,7 +44,7 @@ FEATURE_MDL="/media/veracrypt5/MRC_Data/Models/LFB/Base/feature_bank.base.pth"
 SCRATCH_OUT="/home/s1238640/Documents/Data/scratch_${FOLD_NUM}"
 
 # Variables
-MODEL_FILE="/media/veracrypt5/MRC_Data/Models/LFB/Trained/Folds/C11_S8_L5e-4/${FOLD_NUM}/epoch_${BEST_MDL}.pth"
+MODEL_FILE="/media/veracrypt5/MRC_Data/Models/LFB/Trained/Folds/C11_S8_L5e-4_T7/${FOLD_NUM}/epoch_${BEST_MDL}.pth"
 DATA_DIR="/media/veracrypt4/Q1/Snippets/Curated/Behaviour/Tuning/Folds/${FOLD_NUM}"
 
 # Create Folders
@@ -92,3 +92,4 @@ echo " Inferring Behaviours"
 python tools/test.py \
     "${SCRATCH_OUT}"/infer.py "${MODEL_FILE}" --out "${SCRATCH_OUT}/Predict.csv" --cfg-options data.test.start_index=0
 echo "   == Inference Done =="
+printf '\007'
